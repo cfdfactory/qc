@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>window.QC_API="https://script.google.com/macros/s/AKfycbxF37A6vs0Su8i2MVC7TF8Z4RfSe8grB1lhP4_JH3LMIEiGH7w9efrQfvw8W_X3rSBD/exec";</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>QC 감리 · IQF</title>
+<style>
+  :root{--bg:#eef1f5;--card:#fff;--ink:#1b2430;--mute:#6b7683;--line:#dfe4ea;
+    --brand:#1f5fbf;--brand-soft:#e7effb;--ok:#1c8f4f;--ok-soft:#e3f5ea;
+    --ng:#c9302c;--ng-soft:#fbe7e6;--warn:#b7791f;--warn-soft:#fdf3dd;--std:#5b4b8a;--std-soft:#efeaf8;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Segoe UI",system-ui,sans-serif;font-size:15px;padding-bottom:96px}
+  .top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;padding:11px 15px 13px}
+  .top.ng{background:var(--ng)}.top.green{background:#3f6b1f}
+  .top .t{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .top .v{font-size:12px;opacity:.92;margin-top:2px;line-height:1.35}
+  .back{background:rgba(255,255,255,.2);border:0;color:#fff;font-size:13px;font-weight:700;border-radius:8px;padding:4px 10px}
+  .wrap{padding:12px 14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+  .chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.ng{background:var(--ng-soft);color:var(--ng)}
+  .chip.warn{background:var(--warn-soft);color:var(--warn)}.chip.run{background:var(--brand-soft);color:var(--brand)}
+  .chip.wait{background:#eceff3;color:#7a8794}
+  .btn{display:block;width:100%;border:0;border-radius:13px;padding:15px;font-size:16px;font-weight:800;color:#fff;background:var(--brand);text-align:center}
+  .btn.ok{background:var(--ok)}.btn.ng{background:var(--ng)}.btn.green{background:#3f6b1f}
+  .btn:active{filter:brightness(.94)}
+  .fabwrap{position:fixed;left:0;right:0;bottom:0;padding:12px 14px;background:linear-gradient(to top,var(--bg) 70%,transparent);z-index:15}
+  .cont{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .cont .no{font-weight:800;font-size:16px}
+  .cont .meta{font-size:12.5px;color:var(--mute);margin-top:3px;line-height:1.45}
+  .bar{height:7px;background:#e6eaf0;border-radius:4px;margin-top:9px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--brand)}
+  .lbl{font-size:12.5px;color:var(--mute);margin-top:6px}.lbl b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{background:#fff;border:1.6px solid var(--line);border-radius:16px;padding:12px 12px 30px;position:relative;min-height:120px}
+  .tile.wide{grid-column:1/-1;min-height:0;padding:11px 12px;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;border-color:#bcd0a0;background:#f4f7ec}
+  .tile.late{border-color:var(--ng);background:#fff6f5}.tile.due{border-color:var(--warn);background:#fffbf0}.tile.ok{border-color:#9ed5b3}
+  .tile .n{width:28px;height:28px;border-radius:9px;background:var(--brand);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  .tile.late .n{background:var(--ng)}.tile.due .n{background:var(--warn)}.tile.ok .n{background:var(--ok)}.tile.wide .n{margin:0;background:#3f6b1f}
+  .tile .k{font-size:15px;font-weight:800;line-height:1.15}.tile .k small{display:block;font-weight:500;color:var(--mute);font-size:11.5px;margin-top:1px}
+  .tile .s{font-size:11.5px;color:var(--mute);margin-top:7px;line-height:1.35}.tile .s b{color:var(--ink)}
+  .tile .badge{position:absolute;right:10px;top:10px}
+  .tile .need{position:absolute;right:10px;bottom:8px;font-size:10px;color:#fff;background:#1b2430;border-radius:5px;padding:1px 6px}
+  .std{display:grid;grid-template-columns:112px 1fr;gap:10px;background:var(--std-soft);border:1.5px solid #c9bde6;border-radius:14px;padding:10px;margin-bottom:10px}
+  .std .img{aspect-ratio:4/3;border-radius:9px;background:#d8cbe8 center/cover;position:relative;overflow:hidden}
+  .std .img span{position:absolute;left:0;right:0;bottom:0;background:rgba(60,40,110,.72);color:#fff;font-size:10px;padding:2px;text-align:center}
+  .std .h{font-size:12px;font-weight:800;color:var(--std);margin-bottom:4px}
+  .std ul{list-style:none;font-size:12px;line-height:1.5;color:#2f2a45}.std li:before{content:"· "}.std li small{color:#6b6386;display:block;margin-left:8px}
+  .sec{font-size:13px;font-weight:800;margin:4px 0 6px;display:flex;justify-content:space-between;align-items:center}
+  .sec small{font-weight:600;color:var(--mute)}
+  .req{font-size:10.5px;color:#fff;background:var(--ng);border-radius:5px;padding:1px 6px}
+  .opt{font-size:10.5px;color:#fff;background:#7a8794;border-radius:5px;padding:1px 6px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .shot{aspect-ratio:4/3;border-radius:12px;position:relative;overflow:hidden;border:1.5px solid #c3ccd6;background:#dfe4ea center/cover}
+  .shot.empty{background:repeating-linear-gradient(45deg,#f3f5f8,#f3f5f8 8px,#e9edf2 8px,#e9edf2 16px);border:1.5px dashed #b9c3cf;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7a8794;font-size:12px;gap:4px}
+  .shot.empty svg{width:26px;height:26px}
+  .shot .tag{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;padding:2px 6px;border-radius:6px;font-weight:700}
+  .shot .rm{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.6);color:#fff;width:22px;height:22px;border-radius:50%;font-weight:800;display:flex;align-items:center;justify-content:center;border:0}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #eef1f4}
+  .row:first-child{border-top:0}
+  .row .k{font-size:14px;line-height:1.3}.row .k small{display:block;color:var(--mute);font-size:11px}
+  .seg{display:flex;border:1.6px solid var(--line);border-radius:9px;overflow:hidden;font-size:13px;font-weight:800;flex:none}
+  .seg button{padding:8px 15px;border:0;background:#fff;color:#9aa5b1}
+  .seg button.ok{background:var(--ok);color:#fff}.seg button.ng{background:var(--ng);color:#fff}
+  .num{border:1.6px solid var(--line);border-radius:9px;padding:7px 10px;font-size:16px;font-weight:800;width:110px;text-align:center;background:#fff}
+  .num.good{border-color:#9ed5b3;background:#f2fbf5;color:var(--ok)}.num.bad{border-color:#f0a19e;background:#fff3f2;color:var(--ng)}
+  .numwrap{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
+  .num.small{width:128px;font-size:13px;padding:5px 8px;font-weight:600}
+  .num.small::placeholder{color:#a8b1bb;font-weight:500}
+  .numj{font-size:12.5px;font-weight:800;color:#7a8794;text-align:right;line-height:1.15}.numj small{display:block;font-weight:500;font-size:10px}
+  .numj.good{color:var(--ok)}.numj.bad{color:var(--ng)}
+  .field{width:100%;border:1.6px solid var(--line);border-radius:10px;padding:11px;font-size:15px;background:#fff;margin-bottom:9px;font-family:inherit}
+  select.field{appearance:none}
+  .ngbox{background:var(--ng-soft);border:1.5px solid #f0a19e;border-radius:12px;padding:10px 12px;margin:2px 0 9px;font-size:12.5px;line-height:1.5}
+  .ngbox b{color:var(--ng)}
+  .calls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+  .calls a{text-decoration:none;border:1.6px solid var(--ng);color:var(--ng);border-radius:12px;padding:11px 8px;text-align:center;font-weight:800;font-size:14px}
+  .calls a small{display:block;font-weight:500;color:var(--mute);font-size:11px}
+  .banner{background:#1b2430;color:#fff;border-radius:10px;padding:8px 12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .banner b{color:#ffd47a}
+  .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#1b2430;color:#fff;padding:10px 18px;border-radius:22px;font-size:13px;z-index:60;opacity:0;transition:.25s;pointer-events:none;max-width:90%}
+  .toast.on{opacity:1}
+  .loading{position:fixed;inset:0;background:rgba(238,241,245,.7);display:flex;align-items:center;justify-content:center;z-index:50;font-weight:700;color:var(--mute)}
+  .cbrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid #eef1f4;font-size:13px}
+  .hide{display:none}
+  /* ---- A 디자인 (공정·공통 화면) ---- */
+  .albl{font-size:12px;font-weight:800;color:#475569;margin:2px 2px 9px;display:flex;justify-content:space-between;align-items:center}
+  .acard{background:#fff;border:1px solid #eef1f5;border-radius:18px;padding:13px;box-shadow:0 2px 10px rgba(15,23,42,.05);margin-bottom:14px}
+  .athumbs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .athumb{aspect-ratio:1/1;border-radius:13px;position:relative;overflow:hidden;background:#efeaf8 center/cover}
+  .athumb .an{position:absolute;left:7px;top:7px;background:rgba(91,75,138,.92);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;z-index:1}
+  .athumb.empty{border:1.5px dashed #c9bde6;display:flex;align-items:center;justify-content:center;color:#8a7fb0;font-size:11px;text-align:center;line-height:1.35;padding:6px}
+  .acrit{font-size:12.5px;color:#334155;line-height:1.6;margin-top:11px}
+  .acrit ul{list-style:none}.acrit li{margin-bottom:3px}.acrit li:before{content:"· ";color:#4f46e5;font-weight:800}
+  .acrit small{color:#94a3b8;display:block;margin-left:9px;font-size:11px}
+  .aitems{background:#fff;border:1px solid #eef1f5;border-radius:18px;padding:2px 14px;box-shadow:0 2px 10px rgba(15,23,42,.05);margin-bottom:12px}
+  .steps2{display:flex;gap:6px;align-items:center;background:#eafaea;border:1px solid #bfe3c0;border-radius:10px;padding:8px 10px;font-size:12.5px;color:#276a2a;font-weight:600;margin-bottom:12px}
+  .steps2 b{background:#2f7d32;color:#fff;border-radius:6px;padding:2px 7px;font-size:11.5px;font-weight:800}
+  .icard{background:#fff;border:1px solid #eef1f5;border-radius:16px;padding:12px;box-shadow:0 2px 10px rgba(15,23,42,.05);margin-bottom:12px}
+  .icard .itop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+  .icard .ik{font-size:15.5px;font-weight:800;line-height:1.25}.icard .ik small{display:block;color:#8a94a2;font-weight:500;font-size:11.5px;margin-top:1px}
+  .ishots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+  .ishot{aspect-ratio:1/1;border-radius:11px;position:relative;overflow:hidden;background:#5a6b7d center/cover;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;text-align:center;color:#fff;font-weight:600}
+  .ishot.std{background:#efeaf8;color:#5b4b8a;border:1px solid #d9cff0}
+  .ishot.std.empty,.ishot.cam{background:repeating-linear-gradient(45deg,#f3f5f8,#f3f5f8 7px,#e9edf2 7px,#e9edf2 14px)}
+  .ishot.cam{border:1.5px dashed #b9c3cf;color:#7a8794}
+  .ishot.std.empty{border:1.5px dashed #cbb8ec;color:#7a6ba6}
+  .ishot svg{width:22px;height:22px;margin-bottom:3px;opacity:.75}
+  .ishot .stag{position:absolute;left:5px;top:5px;background:rgba(91,75,138,.9);color:#fff;font-size:10px;padding:1px 6px;border-radius:5px;font-weight:700}
+  .ishot .ptag{position:absolute;left:5px;top:5px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;padding:1px 6px;border-radius:5px;font-weight:700}
+  .ishot .stedit{position:absolute;right:5px;bottom:5px;background:rgba(91,75,138,.85);color:#fff;font-size:10px;padding:1px 6px;border-radius:5px}
+  .upb{position:absolute;left:5px;bottom:5px;background:rgba(0,0,0,.6);color:#ffd47a;font-size:9.5px;padding:1px 6px;border-radius:5px;font-weight:700}
+  .upb.fail{color:#ffb3ad}
+  .ishot .rm{position:absolute;right:5px;top:5px;background:rgba(0,0,0,.6);color:#fff;width:21px;height:21px;border-radius:50%;font-weight:800;display:flex;align-items:center;justify-content:center;border:0;font-size:14px}
+  /* ---- 수정·삭제·휴지통 ---- */
+  .cardmenu{position:absolute;right:9px;bottom:9px;width:42px;height:32px;border:1px solid var(--line);border-radius:9px;background:#f7f9fc;color:#5b6b7d;font-size:19px;font-weight:800;line-height:1;padding:0}
+  .mask{position:fixed;inset:0;background:rgba(15,20,28,.45);display:flex;align-items:flex-end;z-index:70}
+  .sheet{width:100%;background:#fff;border-radius:18px 18px 0 0;padding:8px 12px 18px;max-width:520px;margin:0 auto}
+  .sheet .gh{width:38px;height:4px;background:#d5dbe3;border-radius:3px;margin:6px auto 10px}
+  .sheet .ttl{font-size:13px;font-weight:800;text-align:center;color:#334155;margin-bottom:6px}
+  .act{display:flex;align-items:center;gap:12px;padding:14px 10px;border-top:1px solid #f2f4f8;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .act .ic{width:26px;text-align:center;font-size:18px;flex:none}
+  .act small{display:block;font-weight:500;color:var(--mute);font-size:11.5px}
+  .act.del{color:var(--ng)}.act.blue{color:var(--brand)}
+  .act.cancel{justify-content:center;color:var(--mute);font-weight:800;border-top:6px solid #eef1f5;margin-top:4px}
+  .trow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .trow .l{font-size:14px;font-weight:700}.trow .l small{display:block;color:var(--mute);font-weight:500;font-size:11.5px}
+  .restore{border:1.5px solid var(--brand);color:var(--brand);background:#fff;border-radius:9px;padding:8px 11px;font-size:13px;font-weight:800;flex:none;line-height:1.25}
+  .del2{border:1.5px solid var(--ng);color:var(--ng);background:#fff;border-radius:10px;padding:8px 12px;font-size:16px;font-weight:800;flex:none}
+  .pausecard{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-color:#cfd6df}
+  .pausecard.on{background:#fff8e6;border-color:#f0c96b}
+  .pausecard .ps{font-size:11.5px;color:#6b7683;margin-top:3px;line-height:1.4}
+  .pbtn{flex:none;border:1.6px solid #7a8794;color:#3d4753;background:#fff;border-radius:11px;padding:8px 12px;font-size:13.5px;font-weight:800;line-height:1.15;text-align:center}
+  .pbtn small{font-weight:500;font-size:10.5px;color:#7a8794}
+  .pbtn.go{background:var(--ok);border-color:var(--ok);color:#fff}.pbtn.go small{color:#dff5e7}
+  .trashlink{display:inline-block;font-size:12.5px;color:#8a94a2;font-weight:700;text-decoration:none;background:#f0f2f5;padding:6px 12px;border-radius:8px}
+  /* ---- 공통 체크 카운트다운 (상단 바 오른쪽) ---- */
+  .top .t,.top .v{padding-right:96px}
+  .cd{position:absolute;right:12px;top:10px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:4px 9px;text-align:center;line-height:1.15;min-width:74px}
+  .cd b{display:block;font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+  .cd small{display:block;font-size:9.5px;opacity:.9;font-weight:600}
+  .cd.warn{background:#ffd47a;color:#5a3d00;border-color:#ffd47a}
+  .cd.late{background:#ff5b55;color:#fff;border-color:#ff5b55;animation:cdp 1s infinite}
+  @keyframes cdp{0%,100%{opacity:1}50%{opacity:.55}}
+  /* ---- 앱 안 카메라 (카메라 앱 안 열고 바로 촬영 → 탭 안 죽음) ---- */
+  .camov{position:fixed;inset:0;background:#000;z-index:90;display:flex;flex-direction:column;overflow:hidden}
+  .camov.hide,.camov .hide{display:none!important}
+  .camov video,.camov canvas{flex:1;width:100%;min-height:0;object-fit:contain;background:#000}
+  .camov .cbar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;color:#fff;background:rgba(0,0,0,.6);position:absolute;left:0;right:0;top:0;z-index:2}
+  .camov .cbar .ct{font-size:14px;font-weight:800;line-height:1.2;flex:1;padding:0 8px;text-align:center}
+  .camov .cbar .ct small{display:block;font-size:11px;opacity:.85;font-weight:500}
+  .camov .cbtn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;padding:7px 12px;font-size:14px;font-weight:800}
+  .camov .cbtn.on{background:#fff;color:#000}
+  .camov .zooms{display:flex;gap:6px}
+  .camov .cfoot{position:absolute;left:0;right:0;bottom:0;z-index:2;background:rgba(0,0,0,.6);padding:14px 16px 22px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+  .camov .shut{width:78px;height:78px;border-radius:50%;background:#fff;border:6px solid rgba(255,255,255,.45);box-shadow:0 0 0 2px #fff inset;justify-self:center}
+  .camov .shut:active{transform:scale(.93)}
+  .camov .alt{background:none;border:0;color:#fff;font-size:12px;font-weight:700;line-height:1.3;text-align:center;opacity:.9}
+  .camov .alt small{display:block;font-size:10.5px;opacity:.75;font-weight:500}
+  .camov .use{background:var(--ok);color:#fff;border:0;border-radius:14px;padding:14px 10px;font-size:16px;font-weight:800;justify-self:stretch}
+  .camov .redo{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:14px;padding:14px 10px;font-size:15px;font-weight:800}
+  .camov .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .25s}
+  .camov .flash.on{opacity:.85;transition:none}
+  .camov .grid9{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,transparent 33.3%,rgba(255,255,255,.18) 33.3%,rgba(255,255,255,.18) calc(33.3% + 1px),transparent calc(33.3% + 1px),transparent 66.6%,rgba(255,255,255,.18) 66.6%,rgba(255,255,255,.18) calc(66.6% + 1px),transparent calc(66.6% + 1px)),linear-gradient(to bottom,transparent 33.3%,rgba(255,255,255,.18) 33.3%,rgba(255,255,255,.18) calc(33.3% + 1px),transparent calc(33.3% + 1px),transparent 66.6%,rgba(255,255,255,.18) 66.6%,rgba(255,255,255,.18) calc(66.6% + 1px),transparent calc(66.6% + 1px))}
+</style>
+</head>
+<body>
+<div id="top" class="top"><div class="t" id="topT">Giám sát QC</div><div class="v" id="topV">QC 감리 · IQF</div><div id="cd" class="cd hide" onclick="cdTap()"></div></div>
+<div id="app" class="wrap"></div>
+<div id="fab" class="fabwrap"></div>
+<div id="toast" class="toast"></div>
+<input type="file" id="cam" accept="image/*" capture="environment" class="hide">
+<!-- 앱 안 카메라 오버레이 -->
+<div id="camov" class="camov hide">
+  <div class="cbar">
+    <button class="cbtn" onclick="camClose()">✕ Đóng</button>
+    <div class="ct" id="camTitle">Chụp ảnh<small>촬영</small></div>
+    <div class="zooms" id="camZooms"><button class="cbtn on" onclick="camZoom(1)">1x</button><button class="cbtn" onclick="camZoom(2)">2x</button><button class="cbtn" onclick="camZoom(3)">3x</button></div>
+    <button class="cbtn" id="camLite" onclick="camLiteToggle()" style="margin-left:6px;font-size:11px" title="Tiết kiệm RAM · 저메모리">RAM</button>
+  </div>
+  <video id="camv" autoplay playsinline muted></video>
+  <canvas id="camc" class="hide"></canvas>
+  <div class="grid9" id="camGrid"></div>
+  <div class="flash" id="camFlash"></div>
+  <div class="cfoot" id="camFootLive">
+    <button class="alt" onclick="camSysFallback()">📁 Camera máy<small>기기 카메라 앱</small></button>
+    <button class="shut" onclick="camShoot()" aria-label="Chụp"></button>
+    <button class="alt" id="camTorch" onclick="camTorchToggle()" style="visibility:hidden">🔦 Đèn<small>플래시</small></button>
+  </div>
+  <div class="cfoot hide" id="camFootPrev" style="grid-template-columns:1fr 1.4fr">
+    <button class="redo" onclick="camRetake()">↺ Chụp lại<small style="display:block;font-size:10.5px;font-weight:500">다시</small></button>
+    <button class="use" onclick="camUse()">✓ Dùng ảnh này<small style="display:block;font-size:10.5px;font-weight:500">이 사진 사용</small></button>
+  </div>
+</div>
+
+<script>
+/* ---------- 서버 브릿지 (google.script.run 또는 로컬 목) ---------- */
+/* QC_API: trang ngoài (GitHub Pages) gọi Apps Script qua doPost / 외부 페이지에서 doPost 로 호출
+   QC_SITE: địa chỉ trang ngoài (chụp trực tiếp) / 외부 페이지 주소 */
+var QC_SITE = '';
+function qcCall(fn, args){
+  if (window.__QC_MOCK__) return window.__QC_MOCK__(fn, args||[]);
+  if (window.QC_API) {
+    return fetch(window.QC_API, {method:'POST', redirect:'follow',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({fn:fn, args:args||[]})})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(j){ if(!j || !j.ok) throw new Error((j&&j.e)||'Lỗi máy chủ · 서버 오류'); return j.r; });
+  }
+  return new Promise(function(res,rej){
+    google.script.run.withSuccessHandler(res).withFailureHandler(function(e){rej(e);})
+      [fn].apply(google.script.run, args||[]);
+  });
+}
+var S = { boot:null, detail:null, screen:'list', proc:null, inspector:'', edit:{} };
+var $ = function(id){return document.getElementById(id);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m];});}
+/* 드라이브 사진 주소 → 폰에서 확실히 뜨는 썸네일 주소 (uc?id= 는 이미지로 안 열리는 경우가 많음). dataURL은 그대로. */
+function imgUrl(u,w){var m=/[?&]id=([^&]+)/.exec(String(u||''));return m?('https://drive.google.com/thumbnail?id='+m[1]+'&sz=w'+(w||600)):String(u||'');}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1800);}
+function loading(on){ if(on){var d=document.createElement('div');d.className='loading';d.id='ld';d.textContent='Đợi chút… · 잠시만요';document.body.appendChild(d);} else {var e=$('ld');if(e)e.remove();} }
+
+/* ---------- 시간/지연 계산 ---------- */
+function nowMin(){var d=new Date();return d.getHours()*60+d.getMinutes();}
+function hm(min){var h=Math.floor(min/60),m=min%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
+function parseHM(s){var p=String(s||'08:00').split(':');return (+p[0])*60+(+p[1]);}
+/* 시각 파싱: 'yyyy-MM-dd HH:mm:ss' 기본, 한 자리 시(9:14)나 다른 서식도 허용 */
+function tParts(ts){ var s=String(ts||''); var m=/(\d{4})[-./ ]\s*(\d{1,2})[-./ ]\s*(\d{1,2})[^\d]*?(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(s); if(!m){ var m2=/(\d{1,2}):(\d{2})/.exec(s); return m2?{h:+m2[1],mi:+m2[2],s:0}:null; } var h=+m[4]; if(/오후|PM/i.test(s)&&h<12)h+=12; if(/오전|AM/i.test(s)&&h===12)h=0; return {y:+m[1],mo:+m[2],d:+m[3],h:h,mi:+m[5],s:+(m[6]||0)}; }
+/* 기록 시각 → 경과 초 (카운트다운용) */
+function secsAgo(ts){ var t=tParts(ts); if(!t) return null; if(t.y){ return (Date.now()-new Date(t.y,t.mo-1,t.d,t.h,t.mi,t.s||0).getTime())/1000; } var d=new Date(); return (d.getHours()*3600+d.getMinutes()*60+d.getSeconds())-(t.h*3600+t.mi*60+(t.s||0)); }
+function tsMin(ts){ var t=tParts(ts); return t? t.h*60+t.mi : null; }
+/* 기록 시각 → 현재까지 경과 분 (날짜 포함, 자정 넘어도 정확). 날짜 없으면 분 단위 비교로 대체 */
+function minsAgo(ts){ var t=tParts(ts); if(!t) return null; if(t.y){ var d=new Date(t.y,t.mo-1,t.d,t.h,t.mi,0); return (Date.now()-d.getTime())/60000; } var n=nowMin(), l=t.h*60+t.mi; return n-l; }
+
+/* ---------- 부트 ---------- */
+function boot(){
+  loading(true);
+  qcCall('apiBootInspector').then(function(b){
+    loading(false); S.boot=b;
+    try { ensureInspector(); }
+    catch(err){ showErr_(err); }
+  }, function(e){ loading(false); renderBootError(e); });
+}
+function showErr_(err){
+  var m = String(err && (err.stack || err.message || err));
+  try{ setTop('Lỗi hiển thị','QC 감리 · 화면 오류','',false); }catch(e){}
+  var a=$('app');
+  if(a){ a.innerHTML='<div class="card"><div style="font-weight:700;color:#c9302c;margin-bottom:6px">Lỗi hiển thị · 화면 표시 오류</div><pre style="white-space:pre-wrap;word-break:break-all;font-size:11px;color:#41474f;margin:0">'+esc(m)+'</pre></div>'; }
+  else { document.body.insertAdjacentHTML('beforeend','<pre style="padding:14px;font-size:11px;white-space:pre-wrap">ERR(no #app): '+esc(m)+'</pre>'); }
+  try{ setFab('<button class="btn" onclick="boot()">Thử lại · 다시 시도</button>'); }catch(e){}
+}
+
+function ensureInspector(){
+  var saved = '';
+  try{ saved = localStorage.getItem('qc_inspector')||''; }catch(e){}
+  if(saved){ S.inspector=saved; flushQueue(); if(!restoreState_()) renderList(); }
+  else { renderNameEntry(); }
+}
+function renderNameEntry(){
+  S.screen='name';
+  setTop('Tên nhân viên QC','검사원 이름','',false);
+  $('app').innerHTML='<div class="card">'+
+    lab('Tên nhân viên QC · 검사원 이름')+
+    '<input id="f_name" class="field" placeholder="VD: Nguyễn Văn A" autocomplete="name">'+
+    '<div style="color:#6b7683;font-size:13px;margin-top:8px;line-height:1.55">Tên người kiểm tra trên điện thoại này. Chỉ nhập một lần.<br><span style="color:#9aa5b1;font-size:11.5px">이 폰으로 검사하는 분 이름입니다. 한 번만 입력하면 저장됩니다.</span></div>'+
+    '</div>';
+  setFab('<button class="btn" onclick="saveInspectorName()">Lưu &amp; bắt đầu · 저장</button>');
+  setTimeout(function(){ var el=$('f_name'); if(el) el.focus(); },120);
+}
+function saveInspectorName(){
+  var el=$('f_name'); var v=(el&&el.value||'').trim();
+  if(!v){ toast('Vui lòng nhập tên · 이름 입력'); if(el) el.focus(); return; }
+  S.inspector=v; try{ localStorage.setItem('qc_inspector',v); }catch(e){}
+  flushQueue(); renderList();
+}
+function renderBootError(e){
+  S.screen='error';
+  setTop('Lỗi kết nối','QC 감리 · 연결 오류','',false);
+  var msg=(e&&(e.message||e))||'Lỗi không xác định / 알 수 없는 오류';
+  $('app').innerHTML='<div class="card">'+
+    '<div style="font-weight:700;color:#c9302c;margin-bottom:8px">Không kết nối được máy chủ · 서버 연결 실패</div>'+
+    '<div style="color:#41474f;font-size:14px;line-height:1.6">Không tải được dữ liệu. Vui lòng kiểm tra mạng rồi thử lại.<br><span style="color:#9aa5b1;font-size:12px">데이터를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도하세요.</span></div>'+
+    '<div style="margin-top:10px;padding:8px 10px;background:#f4f5f7;border-radius:8px;font-size:12px;color:#6b7683;word-break:break-all">'+esc(String(msg))+'</div>'+
+    '</div>';
+  setFab('<button class="btn" onclick="boot()">Thử lại · 다시 시도</button>');
+}
+
+/* ---------- 화면: 컨테이너 목록 ---------- */
+function renderList(){
+  S.screen='list'; clearState_();
+  setTop('Giám sát QC · IQF','QC 감리 · '+esc(S.inspector), '', false);
+  var cs = (S.boot.containers||[]);
+  var open = cs.filter(function(c){return c.status==='진행중';});
+  var done = cs.filter(function(c){return c.status!=='진행중';});
+  var h = queueBanner();
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 6px">'+
+       '<a class="trashlink" onclick="openTrash()">🗑 Thùng rác · 휴지통</a>'+
+       '<a href="'+esc(S.boot.webAppUrl||'')+'?view=admin" target="_top" style="display:inline-block;font-size:13px;color:#5b4b8a;font-weight:700;text-decoration:none;background:#efeaf8;padding:6px 12px;border-radius:8px">⚙ Quản lý · 관리</a></div>';
+  h += '<div class="sec">Đang làm · 진행 중</div>';
+  if(!open.length) h+='<div class="card" style="color:#6b7683">Chưa có container đang làm.<br>Nhấn nút dưới để thêm mới.<br><span style="color:#9aa5b1;font-size:12px">진행 중인 컨테이너가 없습니다. 아래 버튼으로 등록하세요.</span></div>';
+  open.forEach(function(c){ h+=containerCard(c); });
+  if(done.length){ h+='<div class="sec" style="margin-top:14px">Hoàn thành · 완료</div>';
+    done.slice(0,6).forEach(function(c){ h+=containerCard(c,true); }); }
+  $('app').innerHTML=h;
+  setFab('<button class="btn" onclick="renderRegister()">＋ Container mới · 새 컨테이너</button>');
+}
+function containerCard(c,dim){
+  var pc = S.boot.templates.filter(function(t){return t.templateId===c.templateId;})[0];
+  var procN = pc?pc.procCount:6;
+  var stat = (c.status==='진행중'&&c.paused==='Y')?'<span class="chip wait">⏸ Tạm ngưng<br>일시정지</span>':c.status==='진행중'?'<span class="chip run">Đang làm<br>진행중</span>'
+            :(c.status==='발송됨'?'<span class="chip ok">Đã gửi<br>발송됨</span>':'<span class="chip ok">Xong<br>완료</span>');
+  var temp=/^TEMP-/.test(String(c.containerNo||''));
+  return '<div class="card" style="position:relative;'+(dim?'opacity:.75':'')+'" onclick="openContainer(\''+c.containerId+'\')">'+
+    '<div class="cont"><div><div class="no"'+(temp?' style="color:#8a94a2"':'')+'>'+esc(c.containerNo)+(temp?' <span class="chip warn" style="vertical-align:middle">Chưa có số · 번호 미정</span>':'')+'</div>'+
+    '<div class="meta">'+esc(custName(c.customerId))+' · '+esc(c.productVi)+' / '+esc(c.productKo)+
+    (c.sealNo?'<br>Seal 봉인: '+esc(c.sealNo):'')+'</div></div>'+stat+'</div>'+
+    '<div class="lbl" style="padding-right:52px"><b>'+c.checkCount+'</b> lần · '+procN+' cđ · '+c.intervalMin+'′<span style="color:#9aa5b1"> · 체크</span>'+
+    (c.ngCount?' · NG <b style="color:#c9302c">'+c.ngCount+'</b>':'')+'</div>'+
+    '<button class="cardmenu" onclick="event.stopPropagation();openActions(\''+c.containerId+'\')">⋯</button></div>';
+}
+function custName(id){var c=(S.boot.customers||[]).filter(function(x){return x.customerId===id;})[0];return c?c.nameKo:id;}
+
+/* ---------- 화면: 새 컨테이너 등록 ---------- */
+function renderRegister(){
+  S.screen='register';
+  setTop('Container mới','새 컨테이너','list',false);
+  var custOpt=(S.boot.customers||[]).map(function(c){return '<option value="'+c.customerId+'">'+esc(c.nameEn||c.nameKo)+' / '+esc(c.nameKo)+'</option>';}).join('');
+  var tplOpt=(S.boot.templates||[]).map(function(t){return '<option value="'+t.templateId+'" data-int="'+t.intervalMin+'">'+esc(t.nameVi)+' · '+esc(t.nameKo)+' ('+t.procCount+' cđ)</option>';}).join('');
+  $('app').innerHTML=
+    '<div class="card">'+
+    lab('Số container · 컨테이너번호 (tùy chọn · 선택 — để trống thì nhập sau · 비우면 나중에 입력)')+'<input id="f_no" class="field" placeholder="VD: TCLU 123456-7 · để trống = nhập sau">'+
+    lab('Khách hàng · 고객사')+'<select id="f_cust" class="field">'+custOpt+'</select>'+
+    lab('Mặt hàng · 품목')+'<select id="f_tpl" class="field" onchange="onTplChange()">'+tplOpt+'</select>'+
+    '<div class="grid">'+
+      '<div>'+lab('Chu kỳ (phút) · 간격')+'<input id="f_int" class="field" type="number" inputmode="numeric"></div>'+
+      '<div>'+lab('Số lượng · 수량')+'<input id="f_qty" class="field" placeholder="1,850 ctn"></div>'+
+    '</div>'+
+    '<div class="grid">'+
+      '<div>'+lab('Seal · 봉인')+'<input id="f_seal" class="field"></div>'+
+      '<div>'+lab('NSX · 생산일')+'<input id="f_prod" class="field" placeholder="'+today()+'"></div>'+
+    '</div>'+
+    lab('Ghi chú · 메모')+'<input id="f_note" class="field" placeholder="tùy chọn · 선택">'+
+    '</div>';
+  setFab('<button class="btn" onclick="submitContainer()">Lưu · 등록</button>');
+  onTplChange();
+}
+function lab(t){return '<div style="font-size:11.5px;color:#6b7683;margin-bottom:3px">'+esc(t)+'</div>';}
+function today(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function p2(n){return (n<10?'0':'')+n;}
+function onTplChange(){var s=$('f_tpl');if(!s)return;var o=s.options[s.selectedIndex];$('f_int').value=o?o.getAttribute('data-int'):60;}
+function submitContainer(){
+  var no=$('f_no').value.trim();   // 비어 있으면 서버가 임시번호(TEMP-…) 부여 → 나중에 ⋯ 수정에서 입력
+  var p={containerNo:no,customerId:$('f_cust').value,templateId:$('f_tpl').value,
+    intervalMin:+$('f_int').value||60,qty:$('f_qty').value,sealNo:$('f_seal').value,
+    prodDate:$('f_prod').value||today(),inspector:S.inspector,note:$('f_note').value};
+  loading(true);
+  qcCall('apiCreateContainer',[p]).then(function(){ return qcCall('apiBootInspector'); })
+   .then(function(b){S.boot=b;loading(false);toast(no?'Đã lưu · 등록됨':'Đã lưu (chưa có số) · 등록됨(번호 미정) → ⋯ Sửa để nhập số');renderList();},
+     function(e){loading(false);alert('Lỗi · 실패: '+(e&&e.message||e));});
+}
+
+/* ---------- 화면: 공정 선택 ---------- */
+function openContainer(id){
+  loading(true);
+  qcCall('apiContainerDetail',[id]).then(function(d){
+    S.detail=d; loading(false); renderProcSel();
+  }, function(e){loading(false);alert('Lỗi · 실패: '+(e&&e.message||e));});
+}
+function renderProcSel(){
+  S.screen='procsel'; clearState_();
+  var c=S.detail.container, tpl=S.detail.template;
+  setTop(esc(c.containerNo)+' · Chọn công đoạn',esc(c.productVi)+' · 공정 선택','list',false);
+  var interval=+c.intervalMin||60, grace=+(S.detail.settings.lateGraceMin||15);
+  var lastByProc={}; (S.detail.checks||[]).forEach(function(k){var p=String(k.procNo);if(!lastByProc[p]||String(k.ts)>String(lastByProc[p].ts))lastByProc[p]={ts:k.ts,result:k.result};});
+  var lastCommon=(S.detail.common||[]).slice(-1)[0];
+  var h=queueBanner();
+  var paused=isPaused();
+  h+='<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px"><div><b>Chu kỳ '+interval+' phút</b> · 체크 간격 '+interval+'분<div style="font-size:11.5px;color:#6b7683">Quá '+interval+' phút sau lần cuối = trễ · 지나면 지연</div></div><button class="back" style="background:#eef1f5;color:#1f5fbf" onclick="changeInterval()">Đổi chu kỳ</button></div>';
+  if(paused) h+='<div class="card pausecard on"><div><b>⏸ Đang tạm ngưng sản xuất</b> · 생산 일시정지 중<div class="ps">Từ '+esc(fmtHM(c.pausedAt))+' · Đồng hồ và tính trễ đã dừng. Khi chạy lại phải kiểm tra chung trước.<br>재개하면 공통 체크부터 다시 합니다.</div></div><button class="pbtn go" onclick="resumeProd()">▶ Tiếp tục<br><small>재개</small></button></div>';
+  else h+='<div class="card pausecard"><div><b>Sản xuất đang chạy</b> · 생산 중<div class="ps">Ngưng sản xuất (nghỉ, hết hàng…) → bấm Tạm ngưng để dừng đếm giờ.<br>생산 멈추면 일시정지 → 시간 계산 정지</div></div><button class="pbtn" onclick="pauseProd()">⏸ Tạm ngưng<br><small>일시정지</small></button></div>';
+  h+='<div class="grid">';
+  // 공통 체크 wide tile
+  h+=tileCommon(lastCommon, interval, grace);
+  (tpl.procs||[]).forEach(function(p){ h+=tileProc(p, lastByProc[String(p.procNo)], interval, grace); });
+  h+='</div>';
+  h+='<div style="font-size:11.5px;color:#6b7683;margin-top:10px;line-height:1.5">Đỏ = trễ · Vàng = sắp tới · Xanh = OK<br>빨강 = 지연 · 노랑 = 곧 예정 · 초록 = 정상</div>';
+  $('app').innerHTML=h;
+  var doneAll=(tpl.procs||[]).length && (S.detail.checks||[]).length;
+  setFab('<button class="btn green" onclick="completeContainer()">Hoàn thành container · 완료</button>');
+}
+function isPaused(){ return !!(S.detail && S.detail.container && String(S.detail.container.paused).toUpperCase()==='Y'); }
+function resumedAtMs(){ var c=S.detail&&S.detail.container; if(!c||!c.resumedAt) return 0; var t=tParts(c.resumedAt); if(!t||!t.y) return 0; return new Date(t.y,t.mo-1,t.d,t.h,t.mi,t.s||0).getTime(); }
+function tsMs_(ts){ var t=tParts(ts); if(!t||!t.y) return null; return new Date(t.y,t.mo-1,t.d,t.h,t.mi,t.s||0).getTime(); }
+function pauseProd(){
+  if(!confirm('Tạm ngưng sản xuất container này?\nĐồng hồ kiểm tra chung và tính trễ sẽ dừng.\n\n생산을 일시정지할까요? (시간 계산 정지)')) return;
+  loading(true);
+  qcCall('apiPauseContainer',[S.inspector,S.detail.container.containerId]).then(function(){ return qcCall('apiContainerDetail',[S.detail.container.containerId]); })
+   .then(function(d){ S.detail=d; loading(false); toast('⏸ Đã tạm ngưng · 일시정지'); renderProcSel(); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+}
+function resumeProd(){
+  if(!confirm('Tiếp tục sản xuất?\nSau khi tiếp tục phải KIỂM TRA CHUNG trước khi vào công đoạn.\n\n재개할까요? 재개 후 공통 체크부터 다시 합니다.')) return;
+  loading(true);
+  qcCall('apiResumeContainer',[S.inspector,S.detail.container.containerId]).then(function(){ return qcCall('apiContainerDetail',[S.detail.container.containerId]); })
+   .then(function(d){ S.detail=d; loading(false); toast('▶ Tiếp tục · 재개 → kiểm tra chung'); S.afterCommon=null; openCommon(true); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+}
+function statusOf(lastTs, interval, grace){
+  if(isPaused()) return {cls:'',txt:'Tạm ngưng · 일시정지',chip:'<span class="chip wait">⏸</span>'};
+  var w=shiftWin_(); if(!w.inWork) return {cls:'',txt:'Ngoài giờ làm · 근무 외',chip:'<span class="chip wait">—</span>'};
+  // 기준 시각 = 이번 근무 시작 / 재개 시각 중 늦은 것. 그 전 기록은 "이번 근무 아님" → 기준 + 간격부터 계산 (정지 시간·어제 기록으로 지연이 뻥튀기되지 않게)
+  var base=Math.max(w.st.getTime(), resumedAtMs()||0), lastMs=tsMs_(lastTs), fresh=(lastMs!=null && lastMs>=base);
+  var dueMs=(fresh?lastMs:base)+interval*60000, left=Math.round((dueMs-Date.now())/60000);
+  var dueTxt=hm(new Date(dueMs).getHours()*60+new Date(dueMs).getMinutes());
+  if(left<-grace) return {cls:'late',txt:'Trễ '+(-left)+'′ · 지연'+(fresh?'':' (ca này chưa kiểm)'),chip:'<span class="chip ng">Trễ '+(-left)+"'</span>"};
+  if(left<=grace) return {cls:'due',txt:'Sắp tới · 곧 예정',chip:'<span class="chip warn">Sắp tới</span>'};
+  if(!fresh) return {cls:'',txt:'Kế '+dueTxt+' · ca này chưa kiểm',chip:'<span class="chip wait">Chưa</span>'};
+  return {cls:'ok',txt:'Kế '+dueTxt+' · 다음',chip:'<span class="chip ok">OK</span>'};
+}
+function tileProc(p,last,interval,grace){
+  var st=statusOf(last&&last.ts,interval,grace);
+  var ng=last&&String(last.result)==='NG';
+  return '<div class="tile '+st.cls+'" onclick="startProc('+p.procNo+')">'+
+    '<span class="badge">'+(ng?'<span class="chip ng">NG</span>':st.chip)+'</span>'+
+    '<div class="n">'+p.procNo+'</div>'+
+    '<div class="k">'+esc(p.nameVi)+'<small>'+esc(p.nameKo)+'</small></div>'+
+    '<div class="s">'+(last?'Cuối '+esc(fmtHM(last.ts)):'Chưa kiểm')+'<br>'+esc(st.txt)+'</div>'+
+    '<span class="need">'+(String(p.photoRequired).toUpperCase()==='Y'?'📷 bắt buộc':'📷 tùy chọn')+'</span></div>';
+}
+function tileCommon(last,interval,grace){
+  var st=statusOf(last&&last.ts,interval,grace);
+  return '<div class="tile wide '+(st.cls||'')+'" onclick="openCommon()">'+
+    '<div class="n">공</div><div><div class="k">Kiểm tra chung <small>공통 체크 · vệ sinh·côn trùng·thiết bị·sàn</small></div>'+
+    '<div class="s">'+(last?'Cuối '+esc(fmtHM(last.ts)):'Chưa kiểm')+' · '+esc(st.txt)+' · so ảnh chuẩn</div></div>'+st.chip+'</div>';
+}
+function fmtHM(ts){ var t=tParts(ts); return t? p2(t.h)+':'+p2(t.mi) : String(ts||'').slice(11,16); }
+
+function changeInterval(){
+  var v=prompt('Chu kỳ mới (phút) / 새 체크 간격(분)', S.detail.container.intervalMin);
+  if(!v)return; v=parseInt(v,10); if(!v||v<5){toast('Kiểm tra số · 숫자 확인');return;}
+  loading(true);
+  qcCall('apiChangeInterval',[{containerId:S.detail.container.containerId,newMin:v,who:S.inspector,reason:'현장 변경'}])
+   .then(function(){return qcCall('apiContainerDetail',[S.detail.container.containerId]);})
+   .then(function(d){S.detail=d;loading(false);toast('Chu kỳ '+v+'′ · 소장님에게 표시됨');renderProcSel();},
+     function(e){loading(false);alert('Lỗi · 실패: '+(e&&e.message||e));});
+}
+function completeContainer(){
+  if(!confirm('Hoàn thành container này?\n이 컨테이너 검사를 완료할까요?'))return;
+  loading(true);
+  qcCall('apiCompleteContainer',[S.detail.container.containerId]).then(function(){return qcCall('apiBootInspector');})
+   .then(function(b){S.boot=b;loading(false);toast('Hoàn thành · 완료 (소장님이 보고서 발송)');renderList();},
+     function(e){loading(false);alert('Lỗi · 실패: '+(e&&e.message||e));});
+}
+
+/* ---------- 화면: 공정 입력 ---------- */
+function openProcess(procNo){
+  var p=(S.detail.template.procs||[]).filter(function(x){return String(x.procNo)===String(procNo);})[0];
+  S.proc=p; S.edit={itemPhotos:(p.items||[]).map(function(){return [null,null];}), ngPhoto:null, result:'OK'};
+  renderProcess();
+}
+function renderProcess(){
+  S.screen='process'; var p=S.proc, c=S.detail.container;
+  setTop(p.procNo+' · '+esc(p.nameVi), esc(p.nameKo)+' · '+esc(c.containerNo)+' · '+esc(S.inspector),'procsel',false);
+  var req=String(p.photoRequired).toUpperCase()==='Y';
+  var h='<div class="steps2"><b>Kiểm tra chung ✓</b> → Kiểm tra công đoạn <span style="color:#7a8794;font-weight:500">· 공통 완료</span></div>';
+  if(p.stdNotesVi && p.stdNotesVi.length){
+    h+='<div class="acard" style="padding:10px 13px;margin-bottom:12px"><div class="acrit"><ul>'+p.stdNotesVi.map(function(n,i){return '<li>'+esc(n)+(p.stdNotesKo[i]?'<small>'+esc(p.stdNotesKo[i])+'</small>':'')+'</li>';}).join('')+'</ul></div></div>';
+  } else if(p.stdNotesKo && p.stdNotesKo.length){
+    h+='<div class="acard" style="padding:10px 13px;margin-bottom:12px"><div class="acrit"><ul>'+p.stdNotesKo.map(function(n){return '<li>'+esc(n)+'</li>';}).join('')+'</ul></div></div>';
+  }
+  h+='<div class="albl">So sánh ảnh chuẩn ↔ thực tế · 기준↔검사 '+(req?'<span class="req">Ảnh bắt buộc</span>':'<span class="opt">Ảnh tùy chọn</span>')+'</div>';
+  h+=(p.items||[]).map(itemCard).join('');
+  h+='<textarea id="memo" class="field" rows="2" placeholder="Ghi chú · 메모 (tùy chọn)"></textarea>';
+  h+='<div id="ngzone"></div>';
+  $('app').innerHTML=h;
+  setFab('<button class="btn ok" id="saveBtn" onclick="saveProcess()">Lưu → công đoạn tiếp · 저장</button>');
+  refreshResult(); saveState_();
+}
+function itemCard(it,idx){
+  var id='it'+idx, judge;
+  if(it.type==='num'){
+    // 숫자 항목도 Đạt/Lỗi 버튼이 기본. 숫자는 선택 입력(기준 밖이면 자동 Lỗi)
+    judge='<div class="numwrap"><div class="seg" id="'+id+'" data-name="'+esc(it.nameKo)+'" data-vi="'+esc(it.nameVi)+'" data-type="okng" data-val="OK" data-num="1"><button class="ok" onclick="setSeg(\''+id+'\',1)">Đạt</button><button onclick="setSeg(\''+id+'\',0)">Lỗi</button></div>'+
+      '<input class="num small" id="'+id+'n" inputmode="decimal" placeholder="'+esc(it.unit||'số')+' (tùy chọn)" data-min="'+it.min+'" data-max="'+it.max+'" oninput="onNumOpt(this,\''+id+'\')"></div>';
+  } else {
+    judge='<div class="seg" id="'+id+'" data-name="'+esc(it.nameKo)+'" data-vi="'+esc(it.nameVi)+'" data-type="okng" data-val="OK"><button class="ok" onclick="setSeg(\''+id+'\',1)">Đạt</button><button onclick="setSeg(\''+id+'\',0)">Lỗi</button></div>';
+  }
+  var ph=S.edit.itemPhotos[idx]||[null,null];
+  var sub=(it.type==='num'&&it.min!=='')?('chuẩn '+it.min+'~'+it.max+(it.unit||'')):'';
+  return '<div class="icard"><div class="itop"><div class="ik">'+esc(it.nameVi)+'<small>'+esc(it.nameKo)+(sub?' · '+esc(sub):'')+'</small></div>'+judge+'</div>'+
+    '<div class="ishots" id="ish'+idx+'">'+itemStdSlot(it,idx)+itemShot(idx,0,ph[0])+itemShot(idx,1,ph[1])+'</div></div>';
+}
+function itemStdSlot(it,idx){
+  var src=it.stdLocal||(it.stdPhotoUrl?imgUrl(it.stdPhotoUrl,600):'');
+  if(src) return '<div class="ishot std" style="background-image:url('+esc(src)+')" onclick="setItemStd('+idx+')"><span class="stag">Chuẩn</span><span class="stedit">✎ Đổi</span></div>';
+  return '<div class="ishot std empty" onclick="setItemStd('+idx+')"><span class="stag">Chuẩn</span>＋ Ảnh<br>chuẩn</div>';
+}
+function itemShot(idx,slot,p){
+  if(p) return '<div class="ishot" style="background-image:url('+pSrc(p)+')"><span class="ptag">Ảnh '+(slot+1)+'</span>'+pBadge(p)+'<button class="rm" onclick="rmItemPhoto('+idx+','+slot+')">×</button></div>';
+  return '<div class="ishot cam" onclick="captureItem('+idx+','+slot+')"><svg viewBox="0 0 24 24" fill="none" stroke="#7a8794" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Ảnh '+(slot+1)+'<br>Chụp</div>';
+}
+function stdThumb(url,n,idx){
+  if(url) return '<div class="athumb" style="background-image:url('+esc(imgUrl(url,600))+')" onclick="setStd('+idx+')"><span class="an">Chuẩn '+n+'</span><span class="stedit">✎ Đổi</span></div>';
+  return '<div class="athumb empty" onclick="setStd('+idx+')"><span class="an">기준 '+n+'</span>＋ 기준 사진 넣기<br>Thêm ảnh chuẩn</div>';
+}
+function photoSlot(i){
+  var d=S.edit.photos[i];
+  if(d) return '<div class="shot" style="background-image:url('+d+')"><span class="tag">사진 '+(i+1)+'</span><button class="rm" onclick="rmPhoto('+i+')">×</button></div>';
+  return '<div class="shot empty" onclick="capture('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="#7a8794" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>사진 '+(i+1)+'<br>Ảnh '+(i+1)+'</div>';
+}
+function itemRow(it,idx){
+  var id='it'+idx;
+  if(it.type==='num'){
+    return '<div class="row"><div class="k">'+esc(it.nameKo)+'<small>'+esc(it.nameVi)+(it.min!==''?' · 기준 '+it.min+'~'+it.max+(it.unit||''):'')+'</small></div>'+
+      '<input class="num" id="'+id+'" inputmode="decimal" data-min="'+it.min+'" data-max="'+it.max+'" data-name="'+esc(it.nameKo)+'" data-vi="'+esc(it.nameVi)+'" data-type="num" oninput="onNum(this)"></div>';
+  }
+  return '<div class="row"><div class="k">'+esc(it.nameKo)+'<small>'+esc(it.nameVi)+'</small></div>'+
+    '<div class="seg" id="'+id+'" data-name="'+esc(it.nameKo)+'" data-vi="'+esc(it.nameVi)+'" data-type="okng" data-val="OK">'+
+    '<button class="ok" onclick="setSeg(\''+id+'\',1)">합격</button><button onclick="setSeg(\''+id+'\',0)">불량</button></div></div>';
+}
+function setSeg(id,ok){
+  var el=$(id); el.setAttribute('data-val',ok?'OK':'NG');
+  el.children[0].className=ok?'ok':''; el.children[1].className=ok?'':'ng';
+  refreshResult();
+}
+function onNumOpt(el,segId){   // 선택 숫자: 기준 밖이면 자동 Lỗi, 안이면 자동 Đạt
+  var v=parseFloat(el.value), mn=parseFloat(el.getAttribute('data-min')), mx=parseFloat(el.getAttribute('data-max'));
+  var bad = el.value!=='' && !isNaN(v) && ((!isNaN(mn)&&v<mn)||(!isNaN(mx)&&v>mx));
+  el.className='num small '+(el.value===''||isNaN(v)?'':(bad?'bad':'good'));
+  if(el.value!=='' && !isNaN(v)) setSeg(segId, !bad); else refreshResult();
+}
+function onNum(el){
+  var v=parseFloat(el.value), mn=parseFloat(el.getAttribute('data-min')), mx=parseFloat(el.getAttribute('data-max'));
+  var bad = el.value!=='' && !isNaN(v) && ((!isNaN(mn)&&v<mn)||(!isNaN(mx)&&v>mx));
+  el.className='num '+(el.value===''?'':(bad?'bad':'good'));
+  var j=$(el.id+'j'); if(j){ j.className='numj '+(el.value===''?'':(bad?'bad':'good')); j.innerHTML = el.value===''?'✎ Nhập số<small>숫자 입력 → 자동 판정</small>':(isNaN(v)?'? Không phải số<small>숫자 아님</small>':(bad?'✖ Lỗi<small>불량 · ngoài chuẩn</small>':'✔ Đạt<small>합격 · trong chuẩn</small>')); }
+  refreshResult();
+}
+function collectItems(){
+  var out=[],ng=false,i=0;
+  document.querySelectorAll('[data-type]').forEach(function(el){
+    var t=el.getAttribute('data-type'), name=el.getAttribute('data-name'), vi=el.getAttribute('data-vi');
+    var item={nameKo:name,nameVi:vi};
+    if(t==='okng'){var ok=el.getAttribute('data-val')!=='NG';if(!ok)ng=true;item.ok=ok; if(el.getAttribute('data-num')){ var ne=$(el.id+'n'); if(ne&&ne.value!=='') item.value=ne.value; } }
+    else {var v=el.value,mn=parseFloat(el.getAttribute('data-min')),mx=parseFloat(el.getAttribute('data-max'));
+      var bad=v!==''&&((!isNaN(mn)&&+v<mn)||(!isNaN(mx)&&+v>mx));if(bad)ng=true;item.value=v;item.ok=!bad;}
+    if(S.edit&&S.edit.itemPhotos&&S.edit.itemPhotos[i]) item.photos=S.edit.itemPhotos[i].filter(Boolean).map(pOut).filter(Boolean);
+    out.push(item); i++;
+  });
+  return {items:out,ng:ng};
+}
+function refreshResult(){
+  var r=collectItems(); S.edit.result=r.ng?'NG':'OK';
+  var btn=$('saveBtn'); if(btn){btn.className='btn '+(r.ng?'ng':'ok');btn.textContent=r.ng?'Lưu NG · NG 저장':'Lưu → chọn công đoạn · 저장';}
+  $('ngzone').innerHTML = r.ng ? ngZone() : '';
+}
+function ngZone(){
+  var st=S.detail.settings;
+  return '<div class="ngbox"><b>⚠ Có LỖI (NG)</b> · Ghi xử lý + gọi báo cáo<br><span style="color:#8a4a48">Ảnh lỗi = ảnh kiểm tra ở trên · 불량 발생, 조치 입력 후 전화 보고</span></div>'+
+    '<input id="action" class="field" placeholder="Xử lý · 조치">'+
+    '<div class="calls">'+
+      '<a href="tel:'+esc(st.bossPhone||'')+'" onclick="markCall(\'대표님\')">📞 Giám đốc<small>대표님</small></a>'+
+      '<a href="tel:'+esc(st.managerPhone||'')+'" onclick="markCall(\'공장장\')">📞 Quản đốc<small>공장장</small></a>'+
+    '</div><div id="calllog" style="font-size:12px;color:#6b7683"></div>';
+}
+function markCall(who){S.edit.callTo=who;S.edit.callTs=nowStamp();$('calllog').innerHTML='✅ Đã gọi báo cáo: '+who+' · '+S.edit.callTs;}
+function rmNg(){S.edit.ngPhoto=null;refreshResult();}
+function pendingUploads_(){ var n=0; if(!S.edit) return 0; (S.edit.itemPhotos||[]).forEach(function(arr){(arr||[]).forEach(function(p){ if(p&&p.st==='up')n++; });}); if(S.edit.ngPhoto&&S.edit.ngPhoto.st==='up')n++; (S.edit.common||[]).forEach(function(c){ if(c.photo&&c.photo.st==='up')n++; }); return n; }
+var _waitSave=0;
+function waitUploads_(then){   // 올라가는 중인 사진이 있으면 최대 12초 기다렸다가 저장(그래도 안 되면 원본 포함해 저장)
+  var n=pendingUploads_(); if(!n || _waitSave>=8){ _waitSave=0; then(); return; }
+  _waitSave++; toast('Đang tải '+n+' ảnh… đợi chút · 사진 업로드 중'); setTimeout(function(){ waitUploads_(then); },1500);
+}
+function saveProcess(){
+  if(pendingUploads_()){ waitUploads_(saveProcess); return; }
+  var r=collectItems();
+  var p=S.proc, req=String(p.photoRequired).toUpperCase()==='Y';
+  if(req){
+    for(var i=0;i<r.items.length;i++){ if(!(r.items[i].photos&&r.items[i].photos.length)){ toast('Bắt buộc ảnh: chụp "'+(r.items[i].nameVi||r.items[i].nameKo)+'"'); return; } }
+  }
+  var payload={containerId:S.detail.container.containerId,procNo:p.procNo,procNameKo:p.nameKo,
+    ts:nowFull(),inspector:S.inspector,items:r.items,result:r.ng?'NG':'OK',
+    memo:($('memo')||{}).value||'',ngPhoto:pOut(S.edit.ngPhoto)||'',
+    action:($('action')||{}).value||'',callTo:S.edit.callTo||'',callTs:S.edit.callTs||''};
+  clearState_(); saveQueued('apiSaveCheck',payload,'Đã lưu · 공정 저장됨');
+}
+
+/* ---------- 화면: 공통 체크 ---------- */
+function openCommon(isGate){
+  S.commonGate=!!isGate;
+  var common=S.detail.template.common||[];
+  S.edit={common:common.map(function(c){return {nameKo:c.nameKo,nameVi:c.nameVi,stdPhotoUrl:c.stdPhotoUrl,stdLocal:c.stdLocal,ok:true,photo:null};}),result:'OK'};
+  renderCommon();
+}
+function renderCommon(){
+  S.screen='common'; var c=S.detail.container;
+  setTop((S.commonGate?'1) Kiểm tra chung':'Kiểm tra chung'), '공통 체크 · '+esc(c.containerNo)+' · '+esc(S.inspector),'procsel','green');
+  var h='';
+  if(S.commonGate) h+='<div class="acard" style="background:#eaf3ff;border:1px solid #b9d4f5"><b style="color:#1f5fbf">Kiểm tra chung trước khi vào công đoạn · 공정 검사 전 공통 먼저</b><div style="font-size:12.5px;color:#41474f;margin-top:3px">Lưu xong sẽ vào thẳng công đoạn đã chọn. · 저장하면 선택한 공정으로 바로 넘어갑니다.</div></div>';
+  else h+='<div class="acard" style="background:#eafaea;border:1px solid #bfe3c0"><div style="font-size:12.5px;color:#276a2a">Lưu xong → quay về chọn công đoạn; trong '+(+c.intervalMin||60)+' phút tới bấm công đoạn sẽ vào thẳng (không hỏi lại). · 저장 후 '+(+c.intervalMin||60)+'분 안에는 공정을 눌러도 공통 체크를 다시 묻지 않습니다.</div></div>';
+  h+='<div class="albl">Vệ sinh·côn trùng·thiết bị·sàn · so ảnh chuẩn rồi Đạt/Lỗi <span style="color:#9aa5b1">· 공통</span></div>';
+  if(!S.edit.common.length) h+='<div class="acard" style="background:#fff3f2;border:1px solid #f0a19e;color:#8a2a27"><b>⚠ Mẫu mặt hàng này chưa có mục kiểm tra chung.</b><div style="font-size:12.5px;margin-top:4px">Báo quản lý: Quản lý → Mẫu mặt hàng → tab "Chung" → thêm mục. Bấm Lưu để bỏ qua và vào công đoạn.<br><span style="color:#a15a58">이 품목 템플릿에 공통 체크 항목이 없습니다. 관리 → 품목 템플릿 → 공통 탭에서 추가하세요.</span></div></div>';
+  S.edit.common.forEach(function(it,i){
+    h+='<div class="acard"><div class="row" style="padding:0 0 10px;border-top:0"><div class="k">'+esc(it.nameVi)+'<small>'+esc(it.nameKo)+'</small></div>'+
+      '<div class="seg" data-ci="'+i+'"><button class="'+(it.ok?'ok':'')+'" onclick="setCommon('+i+',1)">Đạt</button><button class="'+(it.ok?'':'ng')+'" onclick="setCommon('+i+',0)">Lỗi</button></div></div>'+
+      '<div class="two" style="margin:0"><div class="shot" onclick="setStdCommon('+i+')" style="background:'+((it.stdLocal||it.stdPhotoUrl)?'#efeaf8 url('+esc(it.stdLocal||imgUrl(it.stdPhotoUrl,600))+') center/cover':'#efeaf8')+'"><span class="tag" style="background:rgba(91,75,138,.85)">Chuẩn · 기준</span>'+((it.stdLocal||it.stdPhotoUrl)?'<span class="stedit">✎ Đổi</span>':'<span class="stadd">＋ Ảnh chuẩn</span>')+'</div>'+
+      (it.photo?'<div class="shot" style="background-image:url('+pSrc(it.photo)+')"><span class="tag">Thực tế</span>'+pBadge(it.photo)+'<button class="rm" onclick="rmCommon('+i+')">×</button></div>':
+        '<div class="shot empty" onclick="captureCommon('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="#7a8794" stroke-width="1.8"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Chụp thực tế<br>실제</div>')+
+      '</div></div>';
+  });
+  h+='<div id="cngzone"></div>';
+  $('app').innerHTML=h;
+  setFab('<button class="btn green" id="saveBtn2" onclick="saveCommon()">Lưu → chọn công đoạn · 저장</button>');
+  refreshCommon(); saveState_();
+}
+function setCommon(i,ok){S.edit.common[i].ok=!!ok;renderCommon();}
+function rmCommon(i){S.edit.common[i].photo=null;renderCommon();}
+function refreshCommon(){
+  var ng=S.edit.common.some(function(c){return !c.ok;});
+  S.edit.result=ng?'NG':'OK';
+  var b=$('saveBtn2'); if(b){b.className='btn '+(ng?'ng':'green');}
+  $('cngzone').innerHTML = ng ? '<input id="caction" class="field" placeholder="Xử lý · 조치 (mục Lỗi)">' : '';
+}
+// 공정 누르면 공통 체크 먼저 → 저장하면 그 공정으로
+// 공정 누르면: 공통 체크가 이번 주기 안에 이미 있으면 바로 공정으로, 없으면 공통 체크 먼저
+function commonFresh(){
+  var list=(S.detail.common||[]); if(!list.length) return false;
+  // 가장 최근 공통 체크(시각 기준) 찾기 — 순서가 뒤섞여도 안전
+  var ra=resumedAtMs(), best=null;
+  list.forEach(function(k){ if(ra){ var m=tsMs_(k.ts); if(m!=null && m<ra) return; }  // 재개 이전 공통 체크는 무효
+    var a=minsAgo(k.ts); if(a!=null && (best==null || a<best)) best=a; });
+  if(best==null) return false;
+  var interval=+S.detail.container.intervalMin||60;
+  return best>=-5 && best<=interval;   // -5: 폰/서버 시계 오차 허용
+}
+function startProc(procNo){
+  if(isPaused()){ if(confirm('Đang tạm ngưng sản xuất. Tiếp tục sản xuất và kiểm tra chung?\n\n일시정지 중입니다. 재개하고 공통 체크를 할까요?')){ S.afterCommon=procNo; resumeProd2_(procNo); } return; }
+  if(commonFresh()){ openProcess(procNo); return; }
+  S.afterCommon=procNo; openCommon(true);
+}
+function resumeProd2_(procNo){
+  loading(true);
+  qcCall('apiResumeContainer',[S.inspector,S.detail.container.containerId]).then(function(){ return qcCall('apiContainerDetail',[S.detail.container.containerId]); })
+   .then(function(d){ S.detail=d; loading(false); S.afterCommon=procNo; openCommon(true); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+}
+function saveCommon(){
+  if(pendingUploads_()){ waitUploads_(saveCommon); return; }
+  var ng=S.edit.common.some(function(c){return !c.ok;});
+  var payload={containerId:S.detail.container.containerId,ts:nowFull(),inspector:S.inspector,
+    items:S.edit.common.map(function(c){return {nameKo:c.nameKo,nameVi:c.nameVi,ok:c.ok,photo:pOut(c.photo)||null};}),result:ng?'NG':'OK',action:($('caction')||{}).value||''};
+  var nx=S.afterCommon; S.afterCommon=null; clearState_();
+  loading(true);
+  qcCall('apiSaveCommon',[payload]).then(function(){
+    loading(false); toast(nx?'Đã lưu · vào công đoạn · 공통 저장 → 공정':'Đã lưu · giờ chọn công đoạn · 공통 저장됨 → 공정 선택');
+    qcCall('apiContainerDetail',[S.detail.container.containerId]).then(function(d){S.detail=d; goAfterCommon_(nx);},function(){ goAfterCommon_(nx); });
+  }, function(e){
+    loading(false); enqueue('apiSaveCommon',payload); toast('Chưa gửi được · 전송 실패 ('+errMsg_(e)+') — sẽ gửi lại'); goAfterCommon_(nx);
+  });
+}
+function goAfterCommon_(nx){ if(nx) openProcess(nx); else renderProcSel(); }
+
+/* ---------- 저장 + 오프라인 큐 ---------- */
+function saveQueued(fn,payload,okMsg){
+  loading(true);
+  qcCall(fn,[payload]).then(function(){
+    loading(false);toast(okMsg); reloadDetail();
+  },function(e){
+    loading(false); enqueue(fn,payload); toast('Chưa gửi được · 전송 실패 ('+errMsg_(e)+') — sẽ gửi lại'); reloadDetail();
+  });
+}
+function reloadDetail(){
+  qcCall('apiContainerDetail',[S.detail.container.containerId]).then(function(d){S.detail=d;renderProcSel();},
+    function(){renderProcSel();});
+}
+function enqueue(fn,payload){var q=queue();q.push({fn:fn,payload:payload,at:Date.now()});localStorage.setItem('qc_queue',JSON.stringify(q));}
+function queue(){try{return JSON.parse(localStorage.getItem('qc_queue')||'[]');}catch(e){return [];}}
+function flushQueue(){
+  var q=queue(); if(!q.length)return;
+  var next=q[0];
+  qcCall(next.fn,[next.payload]).then(function(){q.shift();localStorage.setItem('qc_queue',JSON.stringify(q));flushQueue();
+    if(S.screen==='list')renderList();},function(){});
+}
+function queueBanner(){
+  var n=queue().length; if(!n)return '';
+  return '<div class="banner"><span>📶 Chờ gửi <b>'+n+'</b> · 오프라인 '+n+'건</span><span onclick="flushQueue()">Gửi ngay · 전송</span></div>';
+}
+window.addEventListener('online',flushQueue);
+
+/* ---------- 작업 상태 저장/복구 (카메라 다녀오는 동안 폰 브라우저가 페이지를 새로 고쳐도 이어서) ---------- */
+var STATE_KEY='qc_state';
+function saveState_(){
+  try{
+    if(!S.detail || (S.screen!=='process' && S.screen!=='common')) return;
+    var st={t:Date.now(), screen:S.screen, cid:S.detail.container.containerId, procNo:S.proc?S.proc.procNo:null,
+            gate:!!S.commonGate, afterCommon:S.afterCommon||null, edit:S.edit||null, camTarget:camTarget||null};
+    localStorage.setItem(STATE_KEY, JSON.stringify(st, function(k,v){ return (k==='d' && this && this.id && IDB_OK) ? undefined : v; }));
+  }catch(e){}
+}
+function clearState_(){ try{ localStorage.removeItem(STATE_KEY); }catch(e){} }
+function restoreState_(){
+  var st=null; try{ st=JSON.parse(localStorage.getItem(STATE_KEY)||'null'); }catch(e){}
+  if(!st || !st.cid || (Date.now()-st.t)>30*60000 || (st.screen!=='process'&&st.screen!=='common')){ clearState_(); return false; }
+  loading(true);
+  qcCall('apiContainerDetail',[st.cid]).then(function(d){
+    S.detail=d; loading(false); camTarget=st.camTarget||null;
+    if(st.screen==='process'){
+      var p=(d.template.procs||[]).filter(function(x){return String(x.procNo)===String(st.procNo);})[0];
+      if(!p){ clearState_(); renderProcSel(); return; }
+      S.proc=p; S.edit=st.edit||{}; S.edit.result=S.edit.result||'OK';
+      var old=S.edit.itemPhotos||[]; S.edit.itemPhotos=(p.items||[]).map(function(_,i){return old[i]||[null,null];});
+      renderProcess(); retryUploads_(); toast('Tiếp tục kiểm tra · 이어서 진행');
+    } else {
+      S.commonGate=!!st.gate; S.afterCommon=st.afterCommon||null;
+      var common=d.template.common||[], saved=(st.edit&&st.edit.common)||[];
+      S.edit={common:common.map(function(c,i){var s=saved[i]||{};return {nameKo:c.nameKo,nameVi:c.nameVi,stdPhotoUrl:c.stdPhotoUrl,stdLocal:c.stdLocal,ok:(s.ok!==undefined?s.ok:true),photo:s.photo||null};}),result:'OK'};
+      renderCommon(); retryUploads_(); toast('Tiếp tục kiểm tra · 이어서 진행');
+    }
+  },function(){ loading(false); clearState_(); renderList(); });
+  return true;
+}
+
+/* ---------- 사진 촬영 + 각인 ---------- */
+var camTarget=null, camOpen=false;
+function openCam_(){ saveState_(); camOpenInApp_(); }   // 앱 안 카메라 우선, 불가 시 기기 카메라 앱
+function captureNg(){camTarget={type:'ng'};openCam_();}
+function captureCommon(i){camTarget={type:'common',i:i};openCam_();}
+function captureItem(idx,slot){camTarget={type:'itemphoto',item:idx,slot:slot};openCam_();}
+function rmItemPhoto(idx,slot){S.edit.itemPhotos[idx][slot]=null;renderItemShots(idx);}
+function setItemStd(idx){camTarget={type:'itemstd',item:idx};openCam_();}
+function setStdCommon(idx){camTarget={type:'stdcommon',item:idx};openCam_();}
+function renderItemShots(idx){
+  var it=(S.proc.items||[])[idx]||{}, ph=S.edit.itemPhotos[idx]||[null,null];
+  var el=$('ish'+idx); if(el) el.innerHTML=itemStdSlot(it,idx)+itemShot(idx,0,ph[0])+itemShot(idx,1,ph[1]);
+  saveState_();
+}
+window.addEventListener('focus',function(){ setTimeout(function(){ camOpen=false; },1500); });
+$('cam').addEventListener('change',function(ev){
+  var file=ev.target.files[0]; ev.target.value=''; camOpen=false;
+  if(!file)return;
+  processPhoto_(file, +(S.boot.settings.photoMaxPx||1280));
+});
+/* 촬영된 파일/Blob → 축소·각인 → 해당 칸에 넣기 (기기 카메라 앱·앱 안 카메라 공용) */
+function processPhoto_(file, maxpx){
+  // 기준 사진: 타임스탬프 없이 저장 후 서버에 등록
+  if(camTarget.type==='itemstd' || camTarget.type==='stdcommon'){
+    var isCommon=camTarget.type==='stdcommon', idx=camTarget.item, tid=S.detail.container.templateId;
+    readResizeOnly(file,maxpx,function(dataUrl,thumb){
+      loading(true);
+      if(isCommon){
+        var itemNo=(S.detail.template.common[idx]||{}).itemNo||(idx+1);
+        qcCall('apiSetCommonStdPhoto',[S.inspector,tid,itemNo,dataUrl]).then(function(r){
+          loading(false); S.detail.template.common[idx].stdPhotoUrl=r.url; S.detail.template.common[idx].stdLocal=thumb;
+          if(S.edit&&S.edit.common&&S.edit.common[idx]){S.edit.common[idx].stdPhotoUrl=r.url;S.edit.common[idx].stdLocal=thumb;}
+          toast('Đã lưu ảnh chuẩn · 기준 저장'); renderCommon();
+        },function(e){loading(false);toast('Lỗi · 실패: '+(e&&e.message||e));});
+      } else {
+        var it=(S.proc.items||[])[idx]||{};
+        qcCall('apiSetItemStdPhoto',[S.inspector,tid,S.proc.procNo,it.itemNo,dataUrl]).then(function(r){
+          loading(false); S.proc.items[idx].stdPhotoUrl=r.url; S.proc.items[idx].stdLocal=thumb; toast('Đã lưu ảnh chuẩn · 기준 저장'); renderItemShots(idx);
+        },function(e){loading(false);toast('Lỗi · 실패: '+(e&&e.message||e));});
+      }
+    });
+    return;
+  }
+  // 실제(검사/불량/공통) 사진: 타임스탬프 찍어서
+  var stampLines=stampText();
+  var tg=camTarget;
+  readAndStamp(file,maxpx,stampLines,function(dataUrl,thumb){
+    var rec={id:'ph'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), t:thumb, d:dataUrl, u:null, st:'up'}, tag, rerender;
+    idbPut_(rec.id, dataUrl);   // 기기에 즉시 보관 (튕겨도 사진 유지) / lưu vào máy ngay
+    if(tg.type==='itemphoto'){ S.edit.itemPhotos[tg.item][tg.slot]=rec; var it=(S.proc.items||[])[tg.item]||{}; tag=(S.proc.nameKo||'')+'_'+(it.nameKo||''); rerender=function(){renderItemShots(tg.item);}; }
+    else if(tg.type==='ng'){ S.edit.ngPhoto=rec; tag=(S.proc.nameKo||'')+'_NG'; rerender=refreshResult; }
+    else if(tg.type==='common'){ S.edit.common[tg.i].photo=rec; tag='공통_'+(S.edit.common[tg.i].nameKo||''); rerender=renderCommon; }
+    else return;
+    rerender(); uploadRec_(rec, tag, rerender);
+  });
+}
+/* ---------- 사진 레코드: {t:작은 미리보기, d:원본 dataURL(업로드 전/실패 시), u:드라이브 링크, st:up|ok|fail}
+   촬영 직후 1장씩 서버로 올리고 원본은 메모리에서 버림 → 저장 버튼 때 큰 데이터 한 번에 보내다 탭이 죽는 것 방지 */
+function pNorm(p){ if(!p) return null; if(typeof p==='string') return {t:p,d:p,u:null,st:'fail'}; return p; }
+function pSrc(p){ p=pNorm(p); return p ? (p.t || (p.u?imgUrl(p.u,400):'') || p.d || '') : ''; }
+function pOut(p){ p=pNorm(p); return p ? (p.u || p.d || '') : ''; }
+function pBadge(p){ p=pNorm(p); if(!p) return ''; if(p.st==='up') return '<span class="upb">⏳ Đang tải…</span>'; if(p.st==='fail') return '<span class="upb fail" title="'+esc(p.err||'')+'">⚠ '+esc(p.err?String(p.err).slice(0,40):'Chưa gửi · 미전송')+'</span>'; return ''; }
+function uploadRec_(rec, tag, rerender){
+  if(!rec || rec.u || !S.detail) return;
+  if(!rec.d){   // 새로고침 후: 기기 저장소에서 원본 꺼내기 / sau khi tải lại: lấy ảnh từ máy
+    if(!rec.id){ return; }
+    rec.st='up'; try{rerender();}catch(e){}
+    idbGet_(rec.id, function(d){
+      if(d){ rec.d=d; uploadRec_(rec, tag, rerender); }
+      else { rec.st='fail'; rec.err='Mất ảnh trong máy · 기기 사진 없음'; try{rerender();}catch(e){} saveState_(); }
+    });
+    return;
+  }
+  rec.st='up';
+  qcCall('apiUploadPhoto',[S.detail.container.containerId, tag, rec.d]).then(function(r){
+    rec.u=r.url; rec.d=null; rec.st='ok'; rec.err=''; if(rec.id) idbDel_(rec.id);
+    try{rerender();}catch(e){} saveState_();
+  }, function(e){
+    rec.st='fail'; rec.err=errMsg_(e);
+    toast('Lỗi gửi ảnh · 사진 전송 실패: '+rec.err);
+    try{rerender();}catch(e2){} saveState_();
+  });
+}
+/* 실제 오류 문구 / lỗi thật */
+function errMsg_(e){
+  var m=String((e&&e.message)||e||'');
+  if(!navigator.onLine) return 'Mất mạng · 네트워크 끊김';
+  if(/quota|storage|용량|full/i.test(m)) return 'Drive đầy · 드라이브 용량 부족: '+m;
+  if(/authoriz|permission|권한/i.test(m)) return 'Lỗi quyền · 권한 오류: '+m;
+  return m || 'Không rõ · 알 수 없음';
+}
+/* ---------- 기기 사진 보관(IndexedDB) / lưu ảnh trong máy ----------
+   localStorage는 5MB라 사진 몇 장이면 가득 참 → IndexedDB 사용 */
+var IDB_=null, IDB_OK=!!window.indexedDB;
+function idb_(cb){
+  if(!IDB_OK){ cb(null); return; }
+  if(IDB_){ cb(IDB_); return; }
+  try{
+    var rq=indexedDB.open('qc_photos',1);
+    rq.onupgradeneeded=function(){ rq.result.createObjectStore('p'); };
+    rq.onsuccess=function(){ IDB_=rq.result; cb(IDB_); };
+    rq.onerror=function(){ IDB_OK=false; cb(null); };
+  }catch(e){ IDB_OK=false; cb(null); }
+}
+function idbPut_(id,val){ idb_(function(db){ if(!db) return; try{ db.transaction('p','readwrite').objectStore('p').put({v:val,t:Date.now()},id); }catch(e){} }); }
+function idbGet_(id,cb){ idb_(function(db){ if(!db){cb(null);return;} try{ var r=db.transaction('p').objectStore('p').get(id); r.onsuccess=function(){cb(r.result?r.result.v:null);}; r.onerror=function(){cb(null);}; }catch(e){cb(null);} }); }
+function idbDel_(id){ idb_(function(db){ if(!db) return; try{ db.transaction('p','readwrite').objectStore('p').delete(id); }catch(e){} }); }
+/* 3일 지난 사진 정리 / dọn ảnh cũ hơn 3 ngày */
+function idbClean_(){ idb_(function(db){ if(!db) return; try{ var st=db.transaction('p','readwrite').objectStore('p'); var cur=st.openCursor(); cur.onsuccess=function(){ var c=cur.result; if(!c) return; if(Date.now()-((c.value&&c.value.t)||0)>3*86400000) c.delete(); c.continue(); }; }catch(e){} }); }
+setTimeout(idbClean_, 5000);
+function retryUploads_(){   // 새로고침 복귀 후 아직 안 올라간 사진 다시 올리기
+  if(!S.edit) return;
+  (S.edit.itemPhotos||[]).forEach(function(arr,i){ (arr||[]).forEach(function(p,sl){ p=pNorm(p); if(p&&(p.d||p.id)&&!p.u){ arr[sl]=p; var it=(S.proc&&S.proc.items||[])[i]||{}; uploadRec_(p,(S.proc?S.proc.nameKo:'')+'_'+(it.nameKo||''),function(){renderItemShots(i);}); } }); });
+  if(S.edit.ngPhoto){ var n=pNorm(S.edit.ngPhoto); S.edit.ngPhoto=n; if((n.d||n.id)&&!n.u) uploadRec_(n,(S.proc?S.proc.nameKo:'')+'_NG',refreshResult); }
+  (S.edit.common||[]).forEach(function(c){ var p=pNorm(c.photo); c.photo=p; if(p&&(p.d||p.id)&&!p.u) uploadRec_(p,'공통_'+(c.nameKo||''),renderCommon); });
+}
+
+/* ---------- 앱 안 카메라 (getUserMedia) ----------
+   기기 카메라 앱을 열면 메모리 부족한 태블릿에서 크롬 탭이 죽어 화면이 튕김.
+   → 페이지 안에서 미리보기·촬영. 안 되는 기기/권한 거부 시 자동으로 기기 카메라 앱으로. */
+var CAM={stream:null, track:null, zoom:1, hwZoom:false, torch:false, shot:null, supported:!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)};
+/* 저메모리 모드(태블릿·RAM 4GB 이하 기본 ON): 카메라 스트림·저장 해상도를 낮춰 크롬이 탭을 죽이지 않게. 카메라 화면 'RAM' 버튼으로 전환 */
+function liteDefault_(){ try{ var v=localStorage.getItem('qc_lite2'); if(v!==null) return v==='1'; }catch(e){} return true; }   // 모든 기기 기본 ON (RAM 부족 폰 튕김 방지) / mặc định BẬT cho mọi máy
+var LITE=liteDefault_();
+var CAM_PX=LITE?1280:1920;  // 앱 안 카메라 저장 해상도(긴 변)
+function camLiteToggle(){ LITE=!LITE; CAM_PX=LITE?1280:1920; try{localStorage.setItem('qc_lite2',LITE?'1':'0');}catch(e){} camLiteUi_(); camStop_(false); camOpenInApp_(); toast(LITE?'Chế độ tiết kiệm RAM: BẬT · 저메모리 모드 ON':'Chế độ tiết kiệm RAM: TẮT (ảnh nét hơn) · OFF'); }
+function camLiteUi_(){ var b=$('camLite'); if(b){ b.className='cbtn'+(LITE?' on':''); b.textContent=LITE?'RAM ✓':'RAM'; } }
+function camTitle_(){
+  var t=camTarget||{}; var vi='Chụp ảnh', ko='촬영';
+  if(t.type==='itemphoto'){ var it=(S.proc&&S.proc.items||[])[t.item]||{}; vi='Ảnh '+(t.slot+1)+' · '+(it.nameVi||''); ko=it.nameKo||''; }
+  else if(t.type==='itemstd'){ var s=(S.proc&&S.proc.items||[])[t.item]||{}; vi='Ảnh CHUẨN · '+(s.nameVi||''); ko='기준 사진 · '+(s.nameKo||''); }
+  else if(t.type==='common'){ var c=(S.edit&&S.edit.common||[])[t.i]||{}; vi='Kiểm tra chung · '+(c.nameVi||''); ko='공통 · '+(c.nameKo||''); }
+  else if(t.type==='stdcommon'){ var c2=(S.detail&&S.detail.template.common||[])[t.item]||{}; vi='Ảnh CHUẨN · '+(c2.nameVi||''); ko='기준 · '+(c2.nameKo||''); }
+  else if(t.type==='ng'){ vi='Ảnh lỗi (NG)'; ko='불량 사진'; }
+  return vi+'<small>'+esc(ko)+'</small>';
+}
+function camOpenInApp_(){
+  if(!CAM.supported){ camSys_(); return; }
+  var ov=$('camov'); ov.classList.remove('hide'); $('camTitle').innerHTML=camTitle_();
+  $('camFootLive').classList.remove('hide'); $('camFootPrev').classList.add('hide'); $('camc').classList.add('hide'); $('camv').classList.remove('hide'); $('camGrid').classList.remove('hide');
+  CAM.shot=null; CAM.zoom=1; camZoomUi_();
+  if(CAM.stream){ return; }  // 이미 켜져 있으면 재사용
+  camLiteUi_();
+  // 기기마다 지원 조건이 달라 3단계로 재시도 / thử 3 kiểu cấu hình camera
+  var tries=[
+    {audio:false, video:{facingMode:{ideal:'environment'}, width:{ideal:LITE?1280:2560}, height:{ideal:LITE?960:1920}}},
+    {audio:false, video:{facingMode:'environment'}},
+    {audio:false, video:true}
+  ], errs=[];
+  var openTry=function(i){
+    return navigator.mediaDevices.getUserMedia(tries[i]).catch(function(e){
+      errs.push((e&&e.name||'Error')+(e&&e.message?': '+e.message:''));
+      if(i+1<tries.length) return new Promise(function(r){setTimeout(r,300);}).then(function(){ return openTry(i+1); });
+      throw e;
+    });
+  };
+  openTry(0)
+  .then(function(st){
+    CAM.stream=st; CAM.track=st.getVideoTracks()[0]; $('camv').srcObject=st;
+    var caps={}; try{ caps=CAM.track.getCapabilities?CAM.track.getCapabilities():{}; }catch(e){}
+    CAM.hwZoom=!!(caps.zoom && caps.zoom.max>=2);
+    $('camTorch').style.visibility = caps.torch ? 'visible' : 'hidden';
+    camZoom(1);
+    if(errs.length) logClient_('camRetryOk', errs.join(' | '));
+  }, function(err){
+    ov.classList.add('hide');
+    var why=(err&&err.name)||'Error';
+    var vi={NotAllowedError:'Chrome chặn quyền camera',NotReadableError:'Camera đang bị app khác dùng',NotFoundError:'Không tìm thấy camera',OverconstrainedError:'Camera không hỗ trợ cấu hình',SecurityError:'Trang không được phép dùng camera'}[why]||'Lỗi khác';
+    logClient_('camFail', errs.join(' | ')+' | ua='+navigator.userAgent);
+    // Apps Script chặn camera trong khung nhúng → mời mở trang ngoài / 앱스스크립트는 카메라 차단 → 외부 페이지 안내
+    if(!window.QC_API && QC_SITE){
+      if(confirm('Apps Script không cho chụp trong app.\nMở trang QC chụp trực tiếp?\n앱스스크립트에서는 촬영 불가. 직접 촬영 페이지를 열까요?')){
+        try{ window.open(QC_SITE, '_top'); }catch(e){ window.open(QC_SITE, '_blank'); }
+        return;
+      }
+    }
+    // 기기 카메라로 넘어가면 저사양 폰에서 크롬이 꺼져 사진이 사라짐 → 먼저 물어봄
+    // Dùng camera máy dễ bị văng mất ảnh → hỏi trước
+    if(confirm('Không mở được camera trong app: '+vi+' ('+why+').\n앱 카메라를 열 수 없음: '+why+'\n\nDùng camera điện thoại? (máy yếu có thể bị văng, mất ảnh)\n기기 카메라로 촬영할까요? (사진이 사라질 수 있음)')){
+      camSys_();
+    }
+  });
+}
+/* 기기 오류를 서버 AuditLog에 기록 (원격 진단용) / ghi lỗi máy vào AuditLog */
+function logClient_(action, detail){
+  try{ qcCall('apiLogClient',[S.inspector||'', action, String(detail).slice(0,900)]).then(function(){},function(){}); }catch(e){}
+}
+function camSys_(){ camOpen=true; $('cam').click(); }          // 기기 카메라 앱(기존 방식)
+function camSysFallback(){ camStop_(true); camSys_(); }
+function camStop_(hide){
+  try{ if(CAM.stream){ CAM.stream.getTracks().forEach(function(t){t.stop();}); } }catch(e){}
+  CAM.stream=null; CAM.track=null; CAM.torch=false;
+  try{ $('camv').srcObject=null; }catch(e){}
+  if(hide) $('camov').classList.add('hide');
+}
+function camClose(){ camStop_(true); camOpen=false; }
+function camZoomUi_(){ var bs=$('camZooms').children; for(var i=0;i<bs.length;i++){ bs[i].className='cbtn'+((i+1)===CAM.zoom?' on':''); } }
+function camZoom(z){
+  CAM.zoom=z; camZoomUi_();
+  var v=$('camv');
+  if(CAM.hwZoom && CAM.track){
+    var caps=CAM.track.getCapabilities(), zz=Math.min(caps.zoom.max, Math.max(caps.zoom.min||1, z));
+    CAM.track.applyConstraints({advanced:[{zoom:zz}]}).then(function(){ v.style.transform=''; }, function(){ CAM.hwZoom=false; v.style.transform='scale('+z+')'; });
+  } else { v.style.transform = z>1 ? 'scale('+z+')' : ''; }   // 디지털 줌: 미리보기 확대 + 촬영 시 중앙 잘라내기
+}
+function camTorchToggle(){
+  if(!CAM.track) return; CAM.torch=!CAM.torch;
+  CAM.track.applyConstraints({advanced:[{torch:CAM.torch}]}).then(function(){ $('camTorch').className='alt'+(CAM.torch?' on':''); $('camTorch').style.background=CAM.torch?'rgba(255,212,122,.35)':'none'; }, function(){ CAM.torch=false; });
+}
+function camShoot(){
+  var v=$('camv'), cv=$('camc'); if(!v.videoWidth){ toast('Camera chưa sẵn sàng · 카메라 준비 중'); return; }
+  var f=$('camFlash'); f.classList.add('on'); setTimeout(function(){f.classList.remove('on');},60);
+  var z=(CAM.hwZoom?1:CAM.zoom), sw=v.videoWidth/z, sh=v.videoHeight/z, sx=(v.videoWidth-sw)/2, sy=(v.videoHeight-sh)/2;
+  var sc=Math.min(1, CAM_PX/Math.max(sw,sh)); cv.width=Math.round(sw*sc); cv.height=Math.round(sh*sc);
+  cv.getContext('2d').drawImage(v, sx,sy,sw,sh, 0,0,cv.width,cv.height);
+  CAM.shot=cv;
+  // 촬영 즉시 카메라 끔 → RAM 반환 (저사양 폰에서 크롬이 탭을 죽이는 것 방지) / tắt camera ngay để trả RAM
+  try{ if(CAM.stream){ CAM.stream.getTracks().forEach(function(t){t.stop();}); } }catch(e){}
+  CAM.stream=null; CAM.track=null; CAM.torch=false; try{ v.srcObject=null; }catch(e){}
+  // 미리보기(정지 화면) + 사용/다시 버튼
+  v.classList.add('hide'); cv.classList.remove('hide'); $('camGrid').classList.add('hide');
+  $('camFootLive').classList.add('hide'); $('camFootPrev').classList.remove('hide');
+}
+function camRetake(){ var c=$('camc'); CAM.shot=null; c.classList.add('hide'); try{ c.width=c.height=0; }catch(e){} camOpenInApp_(); }   // 카메라 다시 켬 / bật lại camera
+function camUse(){
+  var cv=CAM.shot; if(!cv) return;
+  camStop_(true); camOpen=false;
+  // 캔버스를 그대로 처리 (Blob→FileReader→Image 변환 생략 → 메모리 절약) / xử lý thẳng từ canvas
+  processPhoto_(cv, CAM_PX);
+  CAM.shot=null; try{ cv.width=cv.height=0; }catch(e){}
+}
+// 화면을 벗어나면(탭 숨김) 카메라 끔 → 배터리·메모리
+document.addEventListener('visibilitychange',function(){ if(document.hidden && CAM.stream && !CAM.shot){ camStop_(true); } });
+
+/* 원본: File/Blob 또는 canvas(앱 안 카메라) / nguồn: File/Blob hoặc canvas */
+function srcIsCanvas_(f){ return !!(f && f.getContext); }
+function readResizeOnly(file,maxpx,cb){
+  if(srcIsCanvas_(file)){ var fake={naturalWidth:file.width,naturalHeight:file.height}; return drawResize_(file,fake,maxpx,cb); }
+  var img=new Image();
+  img.onload=function(){
+    var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+    if(!w||!h){toast('Không đọc được ảnh · 사진을 읽지 못했습니다(다시 촬영)');return;}
+    drawResize_(img,img,maxpx,cb); img.src='';
+  };
+  img.onerror=function(){toast('Không đọc được ảnh · 사진 오류');};
+  var fr=new FileReader();fr.onload=function(){img.src=fr.result;};fr.readAsDataURL(file);
+}
+/* 화면 표시용 작은 미리보기(긴 변 420px) — 큰 사진을 화면에 여러 장 깔면 태블릿 메모리가 바닥남 */
+function drawResize_(src,dim,maxpx,cb){
+  var w=dim.naturalWidth||dim.width,h=dim.naturalHeight||dim.height;
+  var sc=Math.min(1,maxpx/Math.max(w,h));
+  w=Math.round(w*sc);h=Math.round(h*sc);
+  var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  cv.getContext('2d').drawImage(src,0,0,w,h);
+  var out=cv.toDataURL('image/jpeg',0.72), th=thumbOf_(cv); cv.width=cv.height=0;
+  cb(out, th);
+}
+function thumbOf_(cv){ var sc=Math.min(1,(LITE?320:420)/Math.max(cv.width,cv.height)); var c2=document.createElement('canvas'); c2.width=Math.max(1,Math.round(cv.width*sc)); c2.height=Math.max(1,Math.round(cv.height*sc)); c2.getContext('2d').drawImage(cv,0,0,c2.width,c2.height); return c2.toDataURL('image/jpeg',0.7); }
+function stampText(){
+  var c=S.detail.container;
+  var tag = S.screen==='common' ? '공통' : (S.proc?S.proc.nameKo:'');
+  return [nowFull().slice(0,16), esc(c.containerNo)+' · '+tag+' · '+esc(S.inspector)];
+}
+function readAndStamp(file,maxpx,lines,cb){
+  if(srcIsCanvas_(file)){ return drawStamp_(file,file.width,file.height,maxpx,lines,cb); }
+  var img=new Image();
+  img.onload=function(){
+    var w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+    if(!w||!h){toast('Không đọc được ảnh · 사진을 읽지 못했습니다(다시 촬영)');return;}
+    drawStamp_(img,w,h,maxpx,lines,cb); img.src='';
+  };
+  img.onerror=function(){toast('Không đọc được ảnh · 사진 오류');};
+  var fr=new FileReader();fr.onload=function(){img.src=fr.result;};fr.readAsDataURL(file);
+}
+function drawStamp_(src,w,h,maxpx,lines,cb){
+  {
+    var sc=Math.min(1,maxpx/Math.max(w,h));
+    w=Math.round(w*sc);h=Math.round(h*sc);
+    var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    var ctx=cv.getContext('2d');ctx.drawImage(src,0,0,w,h);
+    var pad=Math.round(w*0.02), fs=Math.max(13,Math.round(w*0.032));
+    var bh=fs*lines.length+pad*2;
+    ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,h-bh,w,bh);
+    ctx.fillStyle='#fff';ctx.font='bold '+fs+'px sans-serif';ctx.textBaseline='top';
+    lines.forEach(function(t,i){ctx.fillStyle=i===0?'#ffd47a':'#fff';ctx.fillText(t,pad,h-bh+pad+i*fs);});
+    var out=cv.toDataURL('image/jpeg',0.72), th=thumbOf_(cv); cv.width=cv.height=0;
+    cb(out, th);
+  }
+}
+function rmPhoto(i){S.edit.photos[i]=null;$('photos').innerHTML=photoSlot(0)+photoSlot(1);}
+
+/* ---------- 카드 작업: 수정·삭제·되돌리기·검사기록·휴지통 ---------- */
+function findC_(id){ return (S.boot.containers||[]).filter(function(x){return x.containerId===id;})[0]; }
+function closeSheet(){ var e=$('sheet'); if(e) e.remove(); }
+function openActions(id){
+  var c=findC_(id); if(!c) return;
+  var done = c.status!=='진행중';
+  var h='<div class="mask" onclick="closeSheet()"><div class="sheet" onclick="event.stopPropagation()">'+
+    '<div class="gh"></div><div class="ttl">'+esc(c.containerNo)+' · thao tác · 작업</div>'+
+    '<div class="act blue" onclick="editContainer(\''+id+'\')"><span class="ic">✎</span><div>Sửa thông tin<small>정보 수정</small></div></div>'+
+    '<div class="act" onclick="openChecks(\''+id+'\')"><span class="ic">📋</span><div>Xem kiểm tra ('+c.checkCount+')<small>검사 기록 보기·삭제</small></div></div>'+
+    (done?'<div class="act blue" onclick="reopenC(\''+id+'\')"><span class="ic">↩</span><div>Về "đang làm"<small>완료 → 진행중</small></div></div>':'')+
+    '<div class="act del" onclick="trashC(\''+id+'\')"><span class="ic">🗑</span><div>Xóa → thùng rác<small>삭제 → 휴지통</small></div></div>'+
+    '<div class="act cancel" onclick="closeSheet()">Hủy · 취소</div>'+
+    '</div></div>';
+  var d=document.createElement('div'); d.id='sheet'; d.innerHTML=h; document.body.appendChild(d);
+}
+function editContainer(id){ closeSheet(); var c=findC_(id); if(c) renderEditContainer(c); }
+function renderEditContainer(c){
+  S.screen='editc';
+  setTop('Sửa thông tin','정보 수정 · '+esc(c.containerNo),'list',false);
+  var locked=(+c.checkCount)>0;
+  var custOpt=(S.boot.customers||[]).map(function(x){return '<option value="'+x.customerId+'"'+(x.customerId===c.customerId?' selected':'')+'>'+esc(x.nameEn||x.nameKo)+' / '+esc(x.nameKo)+'</option>';}).join('');
+  var tplOpt=(S.boot.templates||[]).map(function(t){return '<option value="'+t.templateId+'"'+(t.templateId===c.templateId?' selected':'')+'>'+esc(t.nameVi)+' · '+esc(t.nameKo)+'</option>';}).join('');
+  $('app').innerHTML='<div class="card">'+
+    lab('Số container · 컨테이너번호')+'<input id="e_no" class="field" value="'+esc(c.containerNo)+'">'+
+    lab('Khách hàng · 고객사')+'<select id="e_cust" class="field">'+custOpt+'</select>'+
+    lab('Mặt hàng · 품목'+(locked?' 🔒':''))+'<select id="e_tpl" class="field"'+(locked?' disabled':'')+'>'+tplOpt+'</select>'+
+    (locked?'<div style="font-size:11px;color:#b7791f;margin-top:3px">검사 기록이 있어 품목은 잠깁니다 · Đã có kiểm tra nên khóa mặt hàng</div>':'')+
+    '<div class="grid"><div>'+lab('Chu kỳ · 간격')+'<input id="e_int" class="field" type="number" inputmode="numeric" value="'+esc(c.intervalMin)+'"></div>'+
+      '<div>'+lab('Số lượng · 수량')+'<input id="e_qty" class="field" value="'+esc(c.qty||'')+'"></div></div>'+
+    '<div class="grid"><div>'+lab('Seal · 봉인')+'<input id="e_seal" class="field" value="'+esc(c.sealNo||'')+'"></div>'+
+      '<div>'+lab('NSX · 생산일')+'<input id="e_prod" class="field" value="'+esc(c.prodDate||'')+'"></div></div>'+
+    lab('Ghi chú · 메모')+'<input id="e_note" class="field" value="'+esc(c.note||'')+'">'+
+    '</div>';
+  setFab('<button class="btn" onclick="submitEdit(\''+c.containerId+'\','+(locked?1:0)+')">Lưu · 저장</button>');
+}
+function submitEdit(id, locked){
+  var no=($('e_no').value||'').trim(); if(!no){ toast('Nhập số container · 번호 입력'); return; }
+  var p={containerNo:no, customerId:$('e_cust').value, intervalMin:+$('e_int').value||60, qty:$('e_qty').value, sealNo:$('e_seal').value, prodDate:$('e_prod').value, note:$('e_note').value};
+  if(!locked) p.templateId=$('e_tpl').value;
+  loading(true);
+  qcCall('apiUpdateContainer',['x',id,p]).then(function(){ return qcCall('apiBootInspector'); })
+   .then(function(b){ S.boot=b; loading(false); toast('Đã lưu · 저장됨'); renderList(); },
+     function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+}
+function reopenC(id){ closeSheet(); if(!confirm('Về "đang làm"? · 진행중으로 되돌릴까요?')) return; loading(true);
+  qcCall('apiReopenContainer',['x',id]).then(function(){return qcCall('apiBootInspector');})
+   .then(function(b){S.boot=b;loading(false);toast('Đã mở lại · 진행중');renderList();},function(e){loading(false);alert('Lỗi: '+(e&&e.message||e));}); }
+function trashC(id){ closeSheet(); var c=findC_(id); var warn=(c&&+c.checkCount>0)?('\n검사 '+c.checkCount+'건도 함께 숨겨집니다(복구 가능).'):'';
+  if(!confirm('Xóa vào thùng rác? · 휴지통으로 삭제할까요?'+warn)) return; loading(true);
+  qcCall('apiTrashContainer',['x',id]).then(function(){return qcCall('apiBootInspector');})
+   .then(function(b){S.boot=b;loading(false);toast('Đã xóa → thùng rác · 휴지통으로');renderList();},function(e){loading(false);alert('Lỗi: '+(e&&e.message||e));}); }
+function openChecks(id){ closeSheet(); loading(true);
+  qcCall('apiChecksOf',[id]).then(function(list){ loading(false); renderChecks(id,list); },function(e){loading(false);alert('Lỗi: '+(e&&e.message||e));}); }
+function renderChecks(id, list){
+  S.screen='checks'; var c=findC_(id);
+  setTop('Kiểm tra ('+list.length+')','검사 기록 · '+esc(c?c.containerNo:''),'list',false);
+  var h='';
+  if(!list.length) h+='<div class="card" style="color:#6b7683">Chưa có kiểm tra · 검사 기록 없음</div>';
+  list.forEach(function(k){
+    var ng=String(k.result)==='NG';
+    var nmVi=k.kind==='common'?'Kiểm tra chung':esc(k.procNameVi||k.procNameKo);
+    var nmKo=k.kind==='common'?'공통':esc(k.procNameKo);
+    h+='<div class="trow"><div class="l">'+nmVi+'<small>'+nmKo+' · '+esc(String(k.ts).slice(5,16))+'</small></div>'+
+       '<span class="res '+(ng?'ng':'ok')+'">'+(ng?'Lỗi':'Đạt')+'</span>'+
+       '<button class="del2" onclick="delRec(\''+k.kind+'\',\''+k.id+'\',\''+id+'\')">🗑</button></div>';
+  });
+  h+='<div style="font-size:11.5px;color:#8a94a2;margin-top:8px;line-height:1.5">🗑 = 이 기록만 휴지통으로. 잘못 찍었으면 지우고 공정에서 다시 찍으세요.<br>Xóa 1 lần → chụp lại ở công đoạn.</div>';
+  $('app').innerHTML=h; setFab('');
+}
+function delRec(kind,recId,cid){
+  if(!confirm('Xóa 1 lần kiểm này? · 이 기록을 휴지통으로?')) return;
+  var fn=kind==='common'?'apiDeleteCommon':'apiDeleteCheck';
+  loading(true);
+  qcCall(fn,['x',recId]).then(function(){ return qcCall('apiChecksOf',[cid]); })
+   .then(function(list){ loading(false); toast('Đã xóa · 삭제됨'); renderChecks(cid,list); },
+     function(e){ loading(false); alert('Lỗi: '+(e&&e.message||e)); });
+}
+function openTrash(){ loading(true); qcCall('apiListTrash',[]).then(function(t){ loading(false); renderTrash(t); },function(e){loading(false);alert('Lỗi: '+(e&&e.message||e));}); }
+function renderTrash(t){
+  S.screen='trash';
+  setTop('Thùng rác · 휴지통','삭제한 것 · 되살릴 수 있음','list','');
+  var h='';
+  if(!t.containers.length && !t.records.length) h+='<div class="card" style="color:#6b7683">Thùng rác trống · 휴지통이 비었습니다</div>';
+  if(t.containers.length){ h+='<div class="sec">Container · 컨테이너</div>';
+    t.containers.forEach(function(c){ h+='<div class="trow"><div class="l">'+esc(c.containerNo)+'<small>'+esc(c.custName)+' · '+esc(c.productVi)+'</small></div><button class="restore" onclick="restoreC(\''+c.containerId+'\')">↩ Khôi phục<br>되살리기</button></div>'; }); }
+  if(t.records.length){ h+='<div class="sec" style="margin-top:12px">Kiểm tra · 검사 기록</div>';
+    t.records.forEach(function(k){ var nm=k.kind==='common'?'공통 · Chung':esc(k.procNameKo); h+='<div class="trow"><div class="l">'+nm+'<small>'+esc(k.containerNo)+' · '+esc(String(k.ts).slice(5,16))+'</small></div><button class="restore" onclick="restoreR(\''+k.kind+'\',\''+k.id+'\')">↩ 되살리기</button></div>'; }); }
+  h+='<div style="font-size:11.5px;color:#8a94a2;margin-top:8px;line-height:1.5">사진·데이터는 그대로 남아 있습니다. 되살리면 목록에 다시 나타납니다.</div>';
+  $('app').innerHTML=h; setFab('');
+}
+function restoreC(id){ loading(true);
+  qcCall('apiRestoreContainer',['x',id]).then(function(){return qcCall('apiBootInspector');})
+   .then(function(b){S.boot=b; return qcCall('apiListTrash',[]);})
+   .then(function(t){ loading(false); toast('Đã khôi phục · 되살림'); renderTrash(t); },function(e){loading(false);alert('Lỗi: '+(e&&e.message||e));}); }
+function restoreR(kind,recId){ var fn=kind==='common'?'apiRestoreCommon':'apiRestoreCheck'; loading(true);
+  qcCall(fn,['x',recId]).then(function(){return qcCall('apiListTrash',[]);})
+   .then(function(t){ loading(false); toast('Đã khôi phục · 되살림'); renderTrash(t); },function(e){loading(false);alert('Lỗi: '+(e&&e.message||e));}); }
+
+/* ---------- 공용 UI ---------- */
+function setTop(t,v,back,cls){
+  $('top').className='top'+(cls==='green'?' green':(cls==='ng'?' ng':''));
+  $('topT').innerHTML=(back?'<button class="back" onclick="goBack(\''+back+'\')">‹ Quay lại</button> ':'')+t;
+  $('topV').innerHTML=v;
+  S.backTarget = back || '';   // 폰 뒤로가기와 동일 목적지
+  if(typeof cdTick==='function') cdTick();
+}
+function goBack(to){ if(to==='list'){boot();} else if(to==='procsel'){renderProcSel();} }
+function setFab(html){$('fab').innerHTML=html;}
+function nowStamp(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+' '+p2(d.getHours())+':'+p2(d.getMinutes());}
+function nowFull(){return nowStamp()+':'+p2(new Date().getSeconds());}
+
+/* ---------- 폰/브라우저 뒤로가기 = 앱 화면 뒤로 (앱이 꺼지지 않게) ---------- */
+function armBack(){
+  if(S.__backArmed) return; S.__backArmed=true;
+  try{ history.pushState({qc:1}, ''); }catch(e){}
+  window.addEventListener('popstate', function(){
+    try{ history.pushState({qc:1}, ''); }catch(e){}  // 항상 방벽을 다시 세워 페이지를 벗어나지 않음
+    if(!$('camov').classList.contains('hide')){ camClose(); return; }  // 앱 안 카메라 열려있으면 닫기만
+    if(camOpen){ camOpen=false; return; }               // 카메라 다녀오며 생기는 가짜 뒤로가기 무시
+    var sh=$('sheet'); if(sh){ sh.remove(); return; }  // 작업 시트가 열려있으면 닫기만
+    var t=S.backTarget||'';
+    if(t){ goBack(t); }
+    else if(S.screen==='list'){ toast('메인 화면 · Màn hình chính'); }
+  });
+}
+
+/* ---------- 공통 체크 카운트다운 (상단 바 오른쪽 · 컨테이너 체크 간격 기준) ---------- */
+/* 근무시간(컨테이너 시작·종료 시각) 안에서만 카운트다운. 근무 외에는 회색 '근무 외'. 어제 기록은 오늘 카운트에 안 씀 */
+function hmSec_(v,def){ var t=tParts(v); if(!t){ var p=String(v||def).split(':'); return ((+p[0])||0)*3600+((+p[1])||0)*60; } return t.h*3600+t.mi*60; }
+function shiftWin_(){   // 오늘(또는 자정 넘김 근무면 어제 시작) 근무 구간 [start,end] Date
+  var c=S.detail.container, s=hmSec_(c.startTime,'08:00'), e=hmSec_(c.endTime,'18:00'), now=new Date();
+  var day=new Date(now.getFullYear(),now.getMonth(),now.getDate()), st=new Date(day.getTime()+s*1000), en=new Date(day.getTime()+e*1000);
+  if(e<=s){ // 자정 넘김 근무
+    if(now<en){ st=new Date(st.getTime()-86400000); } else { en=new Date(en.getTime()+86400000); }
+  }
+  return {st:st, en:en, inWork: now>=st && now<en};
+}
+function cdInfo_(){
+  if(!S.detail) return null;
+  var interval=+S.detail.container.intervalMin||60, w=shiftWin_();
+  if(isPaused()) return {paused:true, interval:interval};
+  if(!w.inWork) return {off:true, interval:interval, st:w.st};
+  var ra=resumedAtMs(), from=Math.max(w.st.getTime(), ra||0);
+  var best=null;   // 이번 근무(재개 이후) 안에서 가장 최근 공통 체크(초 전)
+  (S.detail.common||[]).forEach(function(k){ var a=secsAgo(k.ts); if(a==null) return; if(Date.now()-a*1000 < from) return; if(best==null || a<best) best=a; });
+  if(best==null){ return {none:true, resumed:ra>w.st.getTime(), interval:interval, left:Math.round((from-Date.now())/1000)}; }  // 미실시: 근무 시작(또는 재개)부터 지연
+  return {left:Math.round(interval*60-best), interval:interval};
+}
+function cdTick(){
+  var el=$('cd'); if(!el) return;
+  var show = S.detail && (S.screen==='procsel'||S.screen==='process'||S.screen==='common');
+  if(!show){ el.classList.add('hide'); return; }
+  var i=cdInfo_(); el.classList.remove('hide');
+  if(i.paused){ el.className='cd'; el.style.opacity='.85'; el.innerHTML='<b>⏸</b><small>Tạm ngưng · 일시정지</small>'; return; }
+  if(i.off){ el.className='cd'; el.style.opacity='.75'; el.innerHTML='<b>—:—</b><small>Ngoài giờ làm · 근무 외</small>'; return; }
+  el.style.opacity='';
+  var left=i.left, late=left<0, a=Math.abs(left), hh=Math.floor(a/3600), mm=Math.floor(a%3600/60), ss=a%60, txt=(hh?hh+':':'')+(mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss;
+  if(i.none){ el.className='cd late'; el.innerHTML='<b>-'+txt+'</b><small>'+(i.resumed?'Chưa KT chung sau khi tiếp tục · 재개 후 공통 미실시':'Chưa KT chung hôm nay · 오늘 공통 미실시')+'</small>'; return; }
+  if(late){ el.className='cd late'; el.innerHTML='<b>-'+txt+'</b><small>Đến giờ KT chung · 공통 체크 시간</small>'; }
+  else if(left<=300){ el.className='cd warn'; el.innerHTML='<b>'+txt+'</b><small>Sắp KT chung · 곧 공통</small>'; }
+  else { el.className='cd'; el.innerHTML='<b>'+txt+'</b><small>KT chung sau · 다음 공통</small>'; }
+}
+function cdTap(){
+  if(S.screen==='procsel'){ if(isPaused()) resumeProd(); else openCommon(); return; }
+  var i=cdInfo_(); if(!i) return;
+  toast(i.paused?'Đang tạm ngưng sản xuất · 생산 일시정지 중':i.off?'Ngoài giờ làm việc · 근무 시간 외':i.none?'Hôm nay chưa kiểm tra chung · 오늘 공통 체크 미실시':(i.left<0?'Đã quá giờ kiểm tra chung · 공통 체크 시간 지남':'Còn '+Math.ceil(i.left/60)+' phút đến kiểm tra chung · '+Math.ceil(i.left/60)+'분 후 공통'));
+}
+setInterval(cdTick,1000);
+
+boot();
+armBack();
+</script>
+</body>
+</html>
