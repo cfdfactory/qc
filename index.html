@@ -81,6 +81,8 @@
   .banner b{color:#ffd47a}
   .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#1b2430;color:#fff;padding:10px 18px;border-radius:22px;font-size:13px;z-index:60;opacity:0;transition:.25s;pointer-events:none;max-width:90%}
   .toast.on{opacity:1}
+  .ob{position:fixed;left:12px;bottom:84px;z-index:40;background:#1b2430;color:#ffd47a;font-size:12px;font-weight:700;padding:6px 11px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+  .ob.late{background:#c9302c;color:#fff}
   .loading{position:fixed;inset:0;background:rgba(238,241,245,.7);display:flex;align-items:center;justify-content:center;z-index:50;font-weight:700;color:var(--mute)}
   .cbrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid #eef1f4;font-size:13px}
   .hide{display:none}
@@ -170,6 +172,7 @@
 <div id="app" class="wrap"></div>
 <div id="fab" class="fabwrap"></div>
 <div id="toast" class="toast"></div>
+<div id="ob" class="ob hide" onclick="obTap()"></div>
 <input type="file" id="cam" accept="image/*" capture="environment" class="hide">
 <!-- 앱 안 카메라 오버레이 -->
 <div id="camov" class="camov hide">
@@ -391,7 +394,7 @@ function submitContainer(){
 function openContainer(id){
   loading(true);
   qcCall('apiContainerDetail',[id]).then(function(d){
-    S.detail=d; loading(false); renderProcSel();
+    S.detail=mergePending_(d); loading(false); renderProcSel();
   }, function(e){loading(false);alert('Lỗi · 실패: '+(e&&e.message||e));});
 }
 function renderProcSel(){
@@ -423,13 +426,13 @@ function pauseProd(){
   if(!confirm('Tạm ngưng sản xuất container này?\nĐồng hồ kiểm tra chung và tính trễ sẽ dừng.\n\n생산을 일시정지할까요? (시간 계산 정지)')) return;
   loading(true);
   qcCall('apiPauseContainer',[S.inspector,S.detail.container.containerId]).then(function(){ return qcCall('apiContainerDetail',[S.detail.container.containerId]); })
-   .then(function(d){ S.detail=d; loading(false); toast('⏸ Đã tạm ngưng · 일시정지'); renderProcSel(); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+   .then(function(d){ S.detail=mergePending_(d); loading(false); toast('⏸ Đã tạm ngưng · 일시정지'); renderProcSel(); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
 }
 function resumeProd(){
   if(!confirm('Tiếp tục sản xuất?\nSau khi tiếp tục phải KIỂM TRA CHUNG trước khi vào công đoạn.\n\n재개할까요? 재개 후 공통 체크부터 다시 합니다.')) return;
   loading(true);
   qcCall('apiResumeContainer',[S.inspector,S.detail.container.containerId]).then(function(){ return qcCall('apiContainerDetail',[S.detail.container.containerId]); })
-   .then(function(d){ S.detail=d; loading(false); toast('▶ Tiếp tục · 재개 → kiểm tra chung'); S.afterCommon=null; openCommon(true); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+   .then(function(d){ S.detail=mergePending_(d); loading(false); toast('▶ Tiếp tục · 재개 → kiểm tra chung'); S.afterCommon=null; openCommon(true); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
 }
 function statusOf(lastTs, interval, grace){
   if(isPaused()) return {cls:'',txt:'Tạm ngưng · 일시정지',chip:'<span class="chip wait">⏸</span>'};
@@ -467,10 +470,12 @@ function changeInterval(){
   loading(true);
   qcCall('apiChangeInterval',[{containerId:S.detail.container.containerId,newMin:v,who:S.inspector,reason:'현장 변경'}])
    .then(function(){return qcCall('apiContainerDetail',[S.detail.container.containerId]);})
-   .then(function(d){S.detail=d;loading(false);toast('Chu kỳ '+v+'′ · 소장님에게 표시됨');renderProcSel();},
+   .then(function(d){S.detail=mergePending_(d);loading(false);toast('Chu kỳ '+v+'′ · 소장님에게 표시됨');renderProcSel();},
      function(e){loading(false);alert('Lỗi · 실패: '+(e&&e.message||e));});
 }
 function completeContainer(){
+  var pn=obCount_(S.detail.container.containerId);
+  if(pn){ toast('Còn '+pn+' bản chưa gửi xong — đợi gửi hết rồi hoàn thành · 미전송 '+pn+'건, 전송 후 완료'); obTap(true); return; }
   if(!confirm('Hoàn thành container này?\n이 컨테이너 검사를 완료할까요?'))return;
   loading(true);
   qcCallBoot('apiCompleteContainer',[S.detail.container.containerId])
@@ -598,7 +603,7 @@ function waitUploads_(then){   // 올라가는 중인 사진이 있으면 최대
   _waitSave++; toast('Đang tải '+n+' ảnh… đợi chút · 사진 업로드 중'); setTimeout(function(){ waitUploads_(then); },1500);
 }
 function saveProcess(){
-  if(pendingUploads_()){ waitUploads_(saveProcess); return; }
+  if(!IDB_OK && pendingUploads_()){ waitUploads_(saveProcess); return; }   // máy không có bộ nhớ ảnh → chờ như cũ · 기기 저장소 없으면 예전처럼 대기
   var r=collectItems();
   var p=S.proc, req=String(p.photoRequired).toUpperCase()==='Y';
   if(req){
@@ -608,7 +613,10 @@ function saveProcess(){
     ts:nowFull(),inspector:S.inspector,items:r.items,result:r.ng?'NG':'OK',
     memo:($('memo')||{}).value||'',ngPhoto:pOut(S.edit.ngPhoto)||'',
     action:($('action')||{}).value||'',callTo:S.edit.callTo||'',callTs:S.edit.callTs||''};
-  clearState_(); saveQueued('apiSaveCheck',payload,'Đã lưu · 공정 저장됨');
+  // Lưu vào máy → qua bước sau ngay, app tự gửi ngầm · 기기에 저장 후 바로 다음 단계, 전송은 뒤에서 자동
+  var ph=editPhotoTags_(); clearState_();
+  obAdd_('apiSaveCheck',payload,ph);
+  toast('Đã lưu · 공정 저장됨'); renderProcSel(); obKick();
 }
 
 /* ---------- 화면: 공통 체크 ---------- */
@@ -667,21 +675,17 @@ function startProc(procNo){
 function resumeProd2_(procNo){
   loading(true);
   qcCall('apiResumeContainer',[S.inspector,S.detail.container.containerId]).then(function(){ return qcCall('apiContainerDetail',[S.detail.container.containerId]); })
-   .then(function(d){ S.detail=d; loading(false); S.afterCommon=procNo; openCommon(true); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
+   .then(function(d){ S.detail=mergePending_(d); loading(false); S.afterCommon=procNo; openCommon(true); }, function(e){ loading(false); alert('Lỗi · 실패: '+(e&&e.message||e)); });
 }
 function saveCommon(){
-  if(pendingUploads_()){ waitUploads_(saveCommon); return; }
+  if(!IDB_OK && pendingUploads_()){ waitUploads_(saveCommon); return; }
   var ng=S.edit.common.some(function(c){return !c.ok;});
   var payload={containerId:S.detail.container.containerId,ts:nowFull(),inspector:S.inspector,
     items:S.edit.common.map(function(c){return {nameKo:c.nameKo,nameVi:c.nameVi,ok:c.ok,photo:pOut(c.photo)||null};}),result:ng?'NG':'OK',action:($('caction')||{}).value||''};
-  var nx=S.afterCommon; S.afterCommon=null; clearState_();
-  loading(true);
-  qcCall('apiSaveCommon',[payload]).then(function(){
-    loading(false); toast(nx?'Đã lưu · vào công đoạn · 공통 저장 → 공정':'Đã lưu · giờ chọn công đoạn · 공통 저장됨 → 공정 선택');
-    qcCall('apiContainerDetail',[S.detail.container.containerId]).then(function(d){S.detail=d; goAfterCommon_(nx);},function(){ goAfterCommon_(nx); });
-  }, function(e){
-    loading(false); enqueue('apiSaveCommon',payload); toast('Chưa gửi được · 전송 실패 ('+errMsg_(e)+') — sẽ gửi lại'); goAfterCommon_(nx);
-  });
+  var ph=editPhotoTags_(), nx=S.afterCommon; S.afterCommon=null; clearState_();
+  obAdd_('apiSaveCommon',payload,ph);
+  toast(nx?'Đã lưu · vào công đoạn · 공통 저장 → 공정':'Đã lưu · giờ chọn công đoạn · 공통 저장됨 → 공정 선택');
+  goAfterCommon_(nx); obKick();
 }
 function goAfterCommon_(nx){ if(nx) openProcess(nx); else renderProcSel(); }
 
@@ -695,21 +699,157 @@ function saveQueued(fn,payload,okMsg){
   });
 }
 function reloadDetail(){
-  qcCall('apiContainerDetail',[S.detail.container.containerId]).then(function(d){S.detail=d;renderProcSel();},
+  qcCall('apiContainerDetail',[S.detail.container.containerId]).then(function(d){S.detail=mergePending_(d);renderProcSel();},
     function(){renderProcSel();});
 }
-function enqueue(fn,payload){var q=queue();q.push({fn:fn,payload:payload,at:Date.now()});localStorage.setItem('qc_queue',JSON.stringify(q));}
-function queue(){try{return JSON.parse(localStorage.getItem('qc_queue')||'[]');}catch(e){return [];}}
-function flushQueue(){
-  var q=queue(); if(!q.length)return;
-  var next=q[0];
-  qcCall(next.fn,[next.payload]).then(function(){q.shift();localStorage.setItem('qc_queue',JSON.stringify(q));flushQueue();
-    if(S.screen==='list')renderList();},function(){});
+/* ===== Hộp gửi (outbox) · 전송함 =====
+   QC bấm Lưu → bản ghi vào máy, màn hình đi tiếp ngay. App tự gửi ngầm, tự gửi lại khi mạng rớt.
+   Trước khi gửi lại luôn hỏi máy chủ "đã có chưa?" (theo giờ ts) → không ghi trùng dòng.
+   Ảnh chưa lên Drive: bản ghi giữ mã "@ph:<id>", ảnh lên xong thì tự thay bằng link rồi mới gửi.
+   저장 → 기기 보관 후 즉시 이동. 재전송 전 서버에 이미 있는지 확인(중복 방지). 사진은 업로드 후 링크로 치환. */
+var PH_TOKEN='@ph:';
+function queue(){try{var q=JSON.parse(localStorage.getItem('qc_queue')||'[]');return Array.isArray(q)?q:[];}catch(e){return [];}}
+function queueSave_(q){ try{ localStorage.setItem('qc_queue',JSON.stringify(q)); return true; }catch(e){ return false; } }
+function obNewId_(){ return 'ob'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function obAdd_(fn,payload,ph){
+  var job={id:obNewId_(),fn:fn,payload:payload,at:Date.now(),tries:0,ph:ph||{}};
+  payload.clientId=job.id;
+  var q=queue(); q.push(job);
+  if(!queueSave_(q)){ toast('Bộ nhớ máy đầy — gửi ngay · 기기 저장 공간 부족'); }
+  OB_MEM_[job.id]=job;
+  if(S.detail && S.detail.container.containerId===payload.containerId) mergePending_(S.detail);
+  obUi_(); return job;
 }
-function queueBanner(){
-  var n=queue().length; if(!n)return '';
-  return '<div class="banner"><span>📶 Chờ gửi <b>'+n+'</b> · 오프라인 '+n+'건</span><span onclick="flushQueue()">Gửi ngay · 전송</span></div>';
+function enqueue(fn,payload){ return obAdd_(fn,payload,{}); }   // tên cũ · 예전 이름 유지
+var OB_MEM_={};   // dự phòng khi localStorage đầy · localStorage 가득 찼을 때 대비
+function obJobs_(){
+  var q=queue(), seen={}, ch=false;
+  q.forEach(function(j){ if(!j.id){ j.id=obNewId_(); j.tries=1; j.ph=j.ph||{}; ch=true; } seen[j.id]=1; });   // bản cũ → kiểm tra trước khi gửi lại
+  Object.keys(OB_MEM_).forEach(function(id){ if(!seen[id]){ q.push(OB_MEM_[id]); ch=true; } });
+  if(ch) queueSave_(q);
+  return q;
 }
+function obCount_(cid){ return obJobs_().filter(function(j){ return !cid || (j.payload&&j.payload.containerId===cid); }).length; }
+function obPatch_(id,fnc){ var q=obJobs_(); for(var i=0;i<q.length;i++){ if(q[i].id===id){ if(fnc===null){ q.splice(i,1); delete OB_MEM_[id]; } else { fnc(q[i]); if(OB_MEM_[id]) OB_MEM_[id]=q[i]; } break; } } queueSave_(q); }
+/* Bản đang chờ gửi cũng hiện là "đã kiểm" trên màn chọn công đoạn · 전송 대기 기록도 공정 화면에 반영 */
+function tsSame_(a,b){
+  var x=tsMs_(a), y=tsMs_(b); if(x==null||y==null) return String(a)===String(b);
+  if(x===y) return true;
+  var noSec=function(v){ return !/\d{1,2}:\d{2}:\d{2}/.test(String(v)); };
+  return (noSec(a)||noSec(b)) && Math.floor(x/60000)===Math.floor(y/60000);
+}
+function mergePending_(d){
+  try{
+    if(!d || !d.container) return d;
+    d.checks=(d.checks||[]).filter(function(k){return !k._local;}); d.common=(d.common||[]).filter(function(k){return !k._local;});
+    obJobs_().forEach(function(j){
+      var p=j.payload||{}; if(p.containerId!==d.container.containerId) return;
+      if(j.fn==='apiSaveCommon'){ if(!d.common.some(function(k){return tsSame_(k.ts,p.ts);})) d.common.push({ts:p.ts,result:p.result,inspector:p.inspector,_local:true}); }
+      else if(j.fn==='apiSaveCheck'){ if(!d.checks.some(function(k){return String(k.procNo)===String(p.procNo)&&tsSame_(k.ts,p.ts);})) d.checks.push({procNo:p.procNo,procNameKo:p.procNameKo,ts:p.ts,result:p.result,inspector:p.inspector,_local:true}); }
+    });
+  }catch(e){}
+  return d;
+}
+/* ---- link ảnh đã lên Drive (id → url) · 업로드된 사진 링크 ---- */
+function phMap_(){ try{ return JSON.parse(localStorage.getItem('qc_phurl')||'{}')||{}; }catch(e){ return {}; } }
+function phUrl_(id){ var m=phMap_()[id]; return m?m.u:''; }
+function phSet_(id,url){ if(!id||!url) return; var m=phMap_(); m[id]={u:url,t:Date.now()}; try{ localStorage.setItem('qc_phurl',JSON.stringify(m)); }catch(e){} PH_MEM_[id]=url; }
+var PH_MEM_={}, PH_MISS_={}, PH_WAIT_={}, UP_IDS_={};
+function phClean_(){ var m=phMap_(), used=JSON.stringify(obJobs_()), ch=false; Object.keys(m).forEach(function(id){ if(Date.now()-(m[id].t||0)>86400000 && used.indexOf(PH_TOKEN+id)<0){ delete m[id]; ch=true; } }); if(ch){ try{ localStorage.setItem('qc_phurl',JSON.stringify(m)); }catch(e){} } }
+/* Ảnh của màn đang nhập: id → tên (để gửi tiếp sau khi rời màn) · 현재 화면 사진 id→태그 */
+function editPhotoTags_(){
+  var out={}, add=function(p){ p=pNorm(p); if(p&&p.id&&!p.u) out[p.id]=p.tag||''; };
+  if(!S.edit) return out;
+  (S.edit.itemPhotos||[]).forEach(function(arr){ (arr||[]).forEach(add); }); add(S.edit.ngPhoto);
+  (S.edit.common||[]).forEach(function(c){ add(c.photo); });
+  return out;
+}
+function phEnsure_(id,cid,tag){   // ảnh còn trong máy → gửi lên Drive · 기기에 남은 사진 업로드
+  if(UP_IDS_[id] || (PH_WAIT_[id]&&Date.now()<PH_WAIT_[id])) return;
+  UP_IDS_[id]=1;
+  idbGet_(id,function(d){
+    if(!d){ delete UP_IDS_[id]; PH_MISS_[id]=(PH_MISS_[id]||0)+1; PH_WAIT_[id]=Date.now()+4000; return; }
+    UPQ_.push(function(){
+      return qcCall('apiUploadPhoto',[cid,tag||'',d]).then(function(r){
+        delete UP_IDS_[id]; phSet_(id,r.url); idbDel_(id); obKick();
+      },function(e){ delete UP_IDS_[id]; PH_WAIT_[id]=Date.now()+15000; OB_ERR_=errMsg_(e); obUi_(); });
+    });
+    upRun_();
+  });
+}
+/* Thay "@ph:id" bằng link Drive. Trả về null nếu còn ảnh chưa lên · 토큰→링크, 아직이면 null */
+function obResolve_(job){
+  var ready=true, cid=(job.payload||{}).containerId;
+  var one=function(v){
+    if(typeof v!=='string' || v.indexOf(PH_TOKEN)!==0) return v;
+    var id=v.slice(PH_TOKEN.length), u=PH_MEM_[id]||phUrl_(id);
+    if(u) return u;
+    if((PH_MISS_[id]||0)>=3){ if(!job._lostLogged){ job._lostLogged=1; try{ logClient_('photoLost', id+' | '+(job.ph&&job.ph[id]||'')); }catch(e){} } return null; }   // ảnh mất khỏi máy → gửi không kèm ảnh đó
+    ready=false; phEnsure_(id,cid,(job.ph||{})[id]); return v;
+  };
+  var walk=function(o){
+    if(Array.isArray(o)){ var a=[]; o.forEach(function(x){ var y=(x&&typeof x==='object')?walk(x):one(x); if(y!==null||x===null) a.push(y); }); return a; }
+    var r={}; Object.keys(o).forEach(function(k){ var x=o[k]; var y=(x&&typeof x==='object')?walk(x):one(x); r[k]=(y===null&&typeof x==='string')?'':y; }); return r;
+  };
+  var out=walk(job.payload||{});
+  return ready?out:null;
+}
+function obSavedOnServer_(job,list){
+  var p=job.payload||{}, isCommon=job.fn==='apiSaveCommon';
+  return (list||[]).some(function(k){
+    if((k.kind==='common')!==isCommon) return false;
+    if(!isCommon && String(k.procNameKo||'')!==String(p.procNameKo||'')) return false;
+    return tsSame_(k.ts,p.ts);
+  });
+}
+var OB_BUSY_=false, OB_ERR_='';
+function obKick(){
+  if(OB_BUSY_) return;   // chỉ 1 luồng gửi · 한 번에 하나만 (중복 전송 방지)
+  var q=obJobs_(), now=Date.now(), job=null, payload=null;
+  for(var i=0;i<q.length;i++){
+    var j=q[i]; if(j.nextAt && now<j.nextAt) continue;
+    var pl=(j.fn==='apiSaveCheck'||j.fn==='apiSaveCommon')?obResolve_(j):j.payload;
+    if(pl){ job=j; payload=pl; break; }
+  }
+  obUi_(); if(!job) return;
+  OB_BUSY_=true;
+  var canVerify=(job.fn==='apiSaveCheck'||job.fn==='apiSaveCommon') && payload.containerId;
+  var pre=(job.tries>0 && canVerify) ? qcCall('apiChecksOf',[payload.containerId]).then(function(list){ return obSavedOnServer_(job,list); }) : Promise.resolve(false);
+  pre.then(function(already){
+    if(already) return 'dup';
+    return qcCall(job.fn,[payload]).then(function(){ return 'sent'; });
+  }).then(function(){
+    OB_BUSY_=false; OB_ERR_=''; obPatch_(job.id,null); obUi_(); obAfterSent_(job); obKick();
+  },function(e){
+    OB_BUSY_=false; OB_ERR_=errMsg_(e);
+    obPatch_(job.id,function(x){ x.tries=(x.tries||0)+1; x.err=OB_ERR_; x.nextAt=Date.now()+Math.min(60000,4000*x.tries); });
+    obUi_(); obKick();   // còn bản khác thì gửi tiếp · 다른 건 계속
+  });
+}
+function flushQueue(){ obKick(); }
+function obAfterSent_(job){   // gửi xong → lấy lại dữ liệu mới nhất (âm thầm) · 전송 후 조용히 새로고침
+  var cid=(job.payload||{}).containerId;
+  if(!cid || !S.detail || S.detail.container.containerId!==cid) return;
+  if(S.screen!=='procsel' || obCount_(cid)) return;
+  qcCall('apiContainerDetail',[cid]).then(function(d){ if(S.detail && S.detail.container.containerId===cid){ S.detail=mergePending_(d); if(S.screen==='procsel' && !$('sheet')) renderProcSel(); } },function(){});
+}
+function obUi_(){
+  var el=$('ob'); if(!el) return;
+  var q=obJobs_(), n=q.length;
+  if(!n){ el.className='ob hide'; return; }
+  var oldest=Math.min.apply(null,q.map(function(j){return j.at||Date.now();})), late=(Date.now()-oldest)>10*60000;
+  el.className='ob'+(late?' late':'');
+  el.textContent=late?('⚠ '+n+' chưa gửi · 미전송'):('⏳ '+n+' đang gửi · 전송 중');
+}
+function obTap(quiet){
+  var q=obJobs_(); if(!q.length) return;
+  q.forEach(function(j){ j.nextAt=0; }); queueSave_(q); PH_WAIT_={};
+  if(quiet!==true) toast(navigator.onLine===false?'Mất mạng — có sóng app sẽ tự gửi · 네트워크 없음, 연결되면 자동 전송':('Đang gửi lại '+q.length+' bản'+(OB_ERR_?' ('+OB_ERR_+')':'')+' · 재전송 중'));
+  obKick();
+}
+setInterval(function(){ obKick(); },8000);
+setTimeout(phClean_,7000);
+function queueBanner(){ return ''; }   // thay bằng số nhỏ ở góc màn hình · 화면 구석 숫자로 대체
 window.addEventListener('online',flushQueue);
 
 /* ---------- 작업 상태 저장/복구 (카메라 다녀오는 동안 폰 브라우저가 페이지를 새로 고쳐도 이어서) ---------- */
@@ -728,7 +868,7 @@ function restoreState_(){
   if(!st || !st.cid || (Date.now()-st.t)>30*60000 || (st.screen!=='process'&&st.screen!=='common')){ clearState_(); return false; }
   loading(true);
   qcCall('apiContainerDetail',[st.cid]).then(function(d){
-    S.detail=d; loading(false); camTarget=st.camTarget||null;
+    S.detail=mergePending_(d); loading(false); camTarget=st.camTarget||null;
     if(st.screen==='process'){
       var p=(d.template.procs||[]).filter(function(x){return String(x.procNo)===String(st.procNo);})[0];
       if(!p){ clearState_(); renderProcSel(); return; }
@@ -798,17 +938,25 @@ function processPhoto_(file, maxpx){
     else if(tg.type==='ng'){ S.edit.ngPhoto=rec; tag=(S.proc.nameKo||'')+'_NG'; rerender=refreshResult; }
     else if(tg.type==='common'){ S.edit.common[tg.i].photo=rec; tag='공통_'+(S.edit.common[tg.i].nameKo||''); rerender=renderCommon; }
     else return;
-    rerender(); uploadRec_(rec, tag, rerender);
+    rec.tag=tag; rerender(); uploadRec_(rec, tag, rerender);
   });
 }
 /* ---------- 사진 레코드: {t:작은 미리보기, d:원본 dataURL(업로드 전/실패 시), u:드라이브 링크, st:up|ok|fail}
    촬영 직후 1장씩 서버로 올리고 원본은 메모리에서 버림 → 저장 버튼 때 큰 데이터 한 번에 보내다 탭이 죽는 것 방지 */
 function pNorm(p){ if(!p) return null; if(typeof p==='string') return {t:p,d:p,u:null,st:'fail'}; return p; }
 function pSrc(p){ p=pNorm(p); return p ? (p.t || (p.u?imgUrl(p.u,400):'') || p.d || '') : ''; }
-function pOut(p){ p=pNorm(p); return p ? (p.u || p.d || '') : ''; }
+function pOut(p){ p=pNorm(p); if(!p) return ''; if(p.u) return p.u; if(p.id && IDB_OK){ var k=phUrl_(p.id); return k || (PH_TOKEN+p.id); } return p.d || ''; }   // chưa lên Drive → mã tạm, hộp gửi tự thay link · 업로드 전이면 임시 토큰
 function pBadge(p){ p=pNorm(p); if(!p) return ''; if(p.st==='up') return '<span class="upb">⏳ Đang tải…</span>'; if(p.st==='fail') return '<span class="upb fail" title="'+esc(p.err||'')+'">⚠ '+esc(p.err?String(p.err).slice(0,40):'Chưa gửi · 미전송')+'</span>'; return ''; }
-function uploadRec_(rec, tag, rerender){
+function recLive_(rec){   // ảnh còn trên màn đang nhập? · 현재 입력 화면의 사진인가
+  if(!S.edit || (S.screen!=='process'&&S.screen!=='common')) return false;
+  var hit=false; (S.edit.itemPhotos||[]).forEach(function(a){ (a||[]).forEach(function(p){ if(p===rec) hit=true; }); });
+  if(S.edit.ngPhoto===rec) hit=true; (S.edit.common||[]).forEach(function(c){ if(c.photo===rec) hit=true; });
+  return hit;
+}
+function uploadRec_(rec, tag, rerender0){
   if(!rec || rec.u || !S.detail) return;
+  var rerender=function(){ if(recLive_(rec)) rerender0(); };
+  if(rec.id){ var known=phUrl_(rec.id); if(known){ rec.u=known; rec.d=null; rec.st='ok'; rerender(); return; } }
   if(!rec.d){   // 새로고침 후: 기기 저장소에서 원본 꺼내기 / sau khi tải lại: lấy ảnh từ máy
     if(!rec.id){ return; }
     rec.st='up'; try{rerender();}catch(e){}
@@ -818,19 +966,21 @@ function uploadRec_(rec, tag, rerender){
     });
     return;
   }
-  if(UP_FLY_){ if(UP_FLY_.has(rec)) return; UP_FLY_.add(rec); }   // dang cho/dang gui roi · 이미 대기/전송 중
+  if(UP_FLY_){ if(UP_FLY_.has(rec)) return; }
+  if(rec.id){ if(UP_IDS_[rec.id]){ rec.st='up'; return; } UP_IDS_[rec.id]=1; }   // dang cho/dang gui roi · 이미 대기/전송 중
+  if(UP_FLY_) UP_FLY_.add(rec);
   rec.st='up';
   var cid=S.detail.container.containerId;
   UPQ_.push(function(){
-    if(rec.u || !rec.d){ if(UP_FLY_) UP_FLY_.delete(rec); return Promise.resolve(); }
+    if(rec.u || !rec.d){ if(UP_FLY_) UP_FLY_.delete(rec); if(rec.id) delete UP_IDS_[rec.id]; return Promise.resolve(); }
     return qcCall('apiUploadPhoto',[cid, tag, rec.d]).then(function(r){
       if(UP_FLY_) UP_FLY_.delete(rec);
-      rec.u=r.url; rec.d=null; rec.st='ok'; rec.err=''; if(rec.id) idbDel_(rec.id);
-      try{rerender();}catch(e){} saveState_();
+      rec.u=r.url; rec.d=null; rec.st='ok'; rec.err=''; if(rec.id){ delete UP_IDS_[rec.id]; phSet_(rec.id,r.url); idbDel_(rec.id); }
+      try{rerender();}catch(e){} saveState_(); obKick();
     }, function(e){
-      if(UP_FLY_) UP_FLY_.delete(rec);
+      if(UP_FLY_) UP_FLY_.delete(rec); if(rec.id) delete UP_IDS_[rec.id];
       rec.st='fail'; rec.err=errMsg_(e);
-      toast('Lỗi gửi ảnh · 사진 전송 실패: '+rec.err);
+      if(recLive_(rec)) toast('Ảnh chưa gửi được, app sẽ tự gửi lại · 사진 전송 실패, 자동 재전송: '+rec.err);
       try{ logClient_('upFail', tag+' | '+rec.err); }catch(e3){}
       try{rerender();}catch(e2){} saveState_();
     });
@@ -872,7 +1022,7 @@ function idbPut_(id,val){ idb_(function(db){ if(!db) return; try{ db.transaction
 function idbGet_(id,cb){ idb_(function(db){ if(!db){cb(null);return;} try{ var r=db.transaction('p').objectStore('p').get(id); r.onsuccess=function(){cb(r.result?r.result.v:null);}; r.onerror=function(){cb(null);}; }catch(e){cb(null);} }); }
 function idbDel_(id){ idb_(function(db){ if(!db) return; try{ db.transaction('p','readwrite').objectStore('p').delete(id); }catch(e){} }); }
 /* 3일 지난 사진 정리 / dọn ảnh cũ hơn 3 ngày */
-function idbClean_(){ idb_(function(db){ if(!db) return; try{ var st=db.transaction('p','readwrite').objectStore('p'); var cur=st.openCursor(); cur.onsuccess=function(){ var c=cur.result; if(!c) return; if(Date.now()-((c.value&&c.value.t)||0)>3*86400000) c.delete(); c.continue(); }; }catch(e){} }); }
+function idbClean_(){ var used=''; try{ used=JSON.stringify(obJobs_()); }catch(e){} idb_(function(db){ if(!db) return; try{ var st=db.transaction('p','readwrite').objectStore('p'); var cur=st.openCursor(); cur.onsuccess=function(){ var c=cur.result; if(!c) return; if(Date.now()-((c.value&&c.value.t)||0)>3*86400000 && used.indexOf(PH_TOKEN+c.key)<0) c.delete(); c.continue(); }; }catch(e){} }); }
 setTimeout(idbClean_, 5000);
 function retryUploads_(){   // 새로고침 복귀 후 아직 안 올라간 사진 다시 올리기
   if(!S.edit) return;
